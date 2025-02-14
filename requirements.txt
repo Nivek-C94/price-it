@@ -2,3 +2,7 @@ fastapi
 uvicorn
 requests
 beautifulsoup4
+botasaurus-driver
+numpy
+scipy
+pandas
