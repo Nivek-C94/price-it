@@ -6,43 +6,35 @@ from bs4 import BeautifulSoup
 import statistics
 import re
 
-def scrape_ebay_sold(query, condition=None, min_price=None, max_price=None):
-    """Scrape eBay sold listings with threading and filters."""
-    base_url = "https://www.ebay.com/sch/i.html"
-    params = {
-        "_nkw": query.replace(" ", "+"),
-        "LH_Sold": 1,
-        "LH_Complete": 1,
-        "_ipg": 100  # Get 100 items per page for efficiency
-    }
-    if condition:
-        params["LH_ItemCondition"] = condition
-    
-    results = []
-    prices = []
-    lock = threading.Lock()
-    
-    def scrape_page(page_num):
-        """Threaded function to scrape a single page."""
-        params["_pgn"] = page_num
+class EbayScraper:
+    def __init__(self):
+        self.base_url = "https://www.ebay.com/sch/i.html"
+        self.lock = threading.Lock()
+        self.results = []
+        self.prices = []
+
+    def scrape_page(self, query, condition, specifics, page):
+        condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
+        specifics_filter = f"&_sop=12&{specifics.replace(' ', '+')}" if specifics else ""
+        url = f"{self.base_url}?_nkw={query}&LH_Sold=1&LH_Complete=1{condition_filter}{specifics_filter}&_pgn={page}"
+
         bot = driver.Driver()
-        bot.get(f"{base_url}?_nkw={params['_nkw']}&LH_Sold=1&LH_Complete=1&LH_ItemCondition={params.get('LH_ItemCondition', '')}&_pgn={page_num}")
+        bot.get(url)
         bot.wait_for_element(".s-item")
         html_source = bot.page_source()
         soup = BeautifulSoup(html_source, "html.parser")
-        
+
         local_results = []
         local_prices = []
-        
+
         items = soup.select(".s-item")
         for item in items:
             try:
                 title_elem = item.select_one(".s-item__title > span") or item.select_one(".s-item__title")
                 title = title_elem.get_text(strip=True) if title_elem else "No Title"
                 title = re.sub(r"^New Listing", "", title).strip()
-                
                 if "Shop on eBay" in title:
-                    continue  # Ignore invalid results
+                    continue
                 
                 price_elem = item.select_one(".s-item__price")
                 price_text = price_elem.get_text(strip=True) if price_elem else "No Price"
@@ -56,7 +48,7 @@ def scrape_ebay_sold(query, condition=None, min_price=None, max_price=None):
                 
                 image_elem = item.select_one(".s-item__image img")
                 image_url = image_elem.get("src") if image_elem else "No Image"
-                
+
                 link_elem = item.select_one(".s-item__link")
                 item_url = link_elem.get("href") if link_elem else "No Link"
                 
@@ -76,28 +68,38 @@ def scrape_ebay_sold(query, condition=None, min_price=None, max_price=None):
                 })
             except Exception as e:
                 print(f"Skipping item due to error: {e}")
+
+        with self.lock:
+            self.results.extend(local_results)
+            self.prices.extend(local_prices)
+
+    def scrape_ebay_sold(self, query, condition="", specifics="", min_price=None, max_price=None):
+        query = query.replace(" ", "+")
+        self.results = []
+        self.prices = []
+
+        num_pages = 5
+        threads = []
+        for page in range(1, num_pages + 1):
+            thread = threading.Thread(target=self.scrape_page, args=(query, condition, specifics, page))
+            threads.append(thread)
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+
+        if self.prices:
+            avg_price = statistics.mean(self.prices)
+            std_dev = statistics.stdev(self.prices) if len(self.prices) > 1 else 0
+            for item in self.results:
+                if item["price_value"] is not None:
+                    deviation = abs(item["price_value"] - avg_price)
+                    item["outlier"] = deviation > (1.5 * std_dev)
+
+        # Apply min_price and max_price filters
+        if min_price is not None or max_price is not None:
+            self.results = [item for item in self.results if (min_price is None or item["price_value"] >= min_price) and (max_price is None or item["price_value"] <= max_price)]
         
-        with lock:
-            results.extend(local_results)
-            prices.extend(local_prices)
-        
-        time.sleep(random.uniform(1, 3))  # Randomized delay for anti-detection
-    
-    threads = []
-    for page in range(1, 5):  # Scrape first 5 pages
-        thread = threading.Thread(target=scrape_page, args=(page,))
-        threads.append(thread)
-        thread.start()
-    
-    for thread in threads:
-        thread.join()
-    
-    if prices:
-        avg_price = statistics.mean(prices)
-        std_dev = statistics.stdev(prices) if len(prices) > 1 else 0
-        for item in results:
-            if item["price_value"] is not None:
-                deviation = abs(item["price_value"] - avg_price)
-                item["outlier"] = deviation > (1.5 * std_dev)
-    
-    return results
+        return self.results
+
+scraper = EbayScraper()
