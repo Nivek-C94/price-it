@@ -77,6 +77,8 @@ class EbayScraper:
             self.results.extend(local_results)
             self.prices.extend(local_prices)
 
+        bot.close()
+
     def scrape_ebay_sold(self, query, condition="", specifics="", min_price=None, max_price=None, exclude_parts=True):
         query = query.replace(" ", "+")
         self.results = []
