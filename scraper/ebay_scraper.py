@@ -16,8 +16,9 @@ class EbayScraper:
         condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
         specifics_filter = f"&_sop=12&{specifics.replace(' ', '+')}" if specifics else ""
         url = f"{self.base_url}?_nkw={query}&LH_Sold=1&LH_Complete=1{condition_filter}{specifics_filter}&_pgn={page}"
-
-        bot = driver.Driver()
+        ua = UserAgent()
+        headers = {"User-Agent": ua.random}
+        bot = driver.Driver(headers=headers)
         bot.get(url)
         bot.wait_for_element(".s-item")
         html_source = bot.page_html
