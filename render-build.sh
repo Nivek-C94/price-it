@@ -1,17 +1,13 @@
 #!/bin/bash
 
-# Update package lists
-apt-get update && apt-get install -y wget unzip
-
-# Install Google Chrome
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-apt-get install -y ./google-chrome-stable_current_amd64.deb
-
-# Clean up
-rm google-chrome-stable_current_amd64.deb
-
-# Ensure dependencies are installed
-apt-get install -y python3-pip python3-dev build-essential
-
-# Install Python dependencies
+# Install dependencies
 pip install -r requirements.txt
+
+# Download a pre-built Chrome binary
+mkdir -p /opt/google/chrome
+wget -O /opt/google/chrome/chrome.zip https://storage.googleapis.com/chrome-for-testing-public/122.0.6261.94/linux64/chrome-linux64.zip
+unzip /opt/google/chrome/chrome.zip -d /opt/google/chrome/
+chmod +x /opt/google/chrome/chrome-linux64/chrome
+
+# Set Chrome binary path
+export CHROME_PATH="/opt/google/chrome/chrome-linux64/chrome"
