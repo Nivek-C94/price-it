@@ -1,8 +1,7 @@
 import threading
 import time
 import random
-import requests
-from bs4 import BeautifulSoup
+from botasaurus_driver import driver
 from scraper.utils import detect_price_outliers
 
 def scrape_ebay_sold(query, condition=None, min_price=None, max_price=None):
