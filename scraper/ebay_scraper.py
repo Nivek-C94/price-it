@@ -21,7 +21,7 @@ class EbayScraper:
         bot = driver.Driver()
         bot.get(url)
         bot.wait_for_element(".s-item")
-        html_source = bot.page_source()
+        html_source = bot.page_html
         soup = BeautifulSoup(html_source, "html.parser")
 
         local_results = []
