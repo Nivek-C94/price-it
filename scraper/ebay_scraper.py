@@ -3,7 +3,8 @@ from botasaurus_driver import driver
 from bs4 import BeautifulSoup
 import statistics
 import re
-
+import random
+from fake_useragent import UserAgent
 class EbayScraper:
     def __init__(self):
         self.base_url = "https://www.ebay.com/sch/i.html"
