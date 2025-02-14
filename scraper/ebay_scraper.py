@@ -13,7 +13,7 @@ class EbayScraper:
         self.results = []
         self.prices = []
 
-    def scrape_page(self, query, condition, specifics, page):
+    def scrape_page(self, query, condition, specifics, page, exclude_parts):
         condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
         specifics_filter = f"&_sop=12&{specifics.replace(' ', '+')}" if specifics else ""
         url = f"{self.base_url}?_nkw={query}&LH_Sold=1&LH_Complete=1{condition_filter}{specifics_filter}&_pgn={page}"
@@ -33,8 +33,9 @@ class EbayScraper:
                 title_elem = item.select_one(".s-item__title > span") or item.select_one(".s-item__title")
                 title = title_elem.get_text(strip=True) if title_elem else "No Title"
                 title = re.sub(r"^New Listing", "", title).strip()
-                if "Shop on eBay" in title:
-                    continue
+                
+                if "Shop on eBay" in title or "iPhone 7" in title or "iPhone 8" in title:
+                    continue  # Ignore irrelevant models
                 
                 price_elem = item.select_one(".s-item__price")
                 price_text = price_elem.get_text(strip=True) if price_elem else "No Price"
@@ -46,15 +47,18 @@ class EbayScraper:
                     except ValueError:
                         pass
                 
-                image_elem = item.select_one(".s-item__image img")
-                image_url = image_elem.get("src") if image_elem else "No Image"
-
-                link_elem = item.select_one(".s-item__link")
-                item_url = link_elem.get("href") if link_elem else "No Link"
-                
                 specifics_elem = item.select_one(".s-item__subtitle")
                 specifics_text = specifics_elem.get_text(strip=True) if specifics_elem else "No Details"
                 condition = specifics_text.split("·")[0].strip() if "·" in specifics_text else specifics_text
+                
+                if exclude_parts and "Parts Only" in condition:
+                    continue  # Skip parts-only listings if specified
+                
+                image_elem = item.select_one(".s-item__image img")
+                image_url = image_elem.get("src") if image_elem else "No Image"
+                
+                link_elem = item.select_one(".s-item__link")
+                item_url = link_elem.get("href") if link_elem else "No Link"
                 
                 local_results.append({
                     "title": title,
@@ -73,7 +77,7 @@ class EbayScraper:
             self.results.extend(local_results)
             self.prices.extend(local_prices)
 
-    def scrape_ebay_sold(self, query, condition="", specifics="", min_price=None, max_price=None):
+    def scrape_ebay_sold(self, query, condition="", specifics="", min_price=None, max_price=None, exclude_parts=True):
         query = query.replace(" ", "+")
         self.results = []
         self.prices = []
@@ -81,7 +85,7 @@ class EbayScraper:
         num_pages = 5
         threads = []
         for page in range(1, num_pages + 1):
-            thread = threading.Thread(target=self.scrape_page, args=(query, condition, specifics, page))
+            thread = threading.Thread(target=self.scrape_page, args=(query, condition, specifics, page, exclude_parts))
             threads.append(thread)
             thread.start()
 
@@ -94,11 +98,12 @@ class EbayScraper:
             for item in self.results:
                 if item["price_value"] is not None:
                     deviation = abs(item["price_value"] - avg_price)
-                    item["outlier"] = deviation > (1.5 * std_dev)
+                    item["outlier"] = deviation > (1.2 * std_dev)  # Adjusted threshold
 
-        # Apply min_price and max_price filters
         if min_price is not None or max_price is not None:
             self.results = [item for item in self.results if (min_price is None or item["price_value"] >= min_price) and (max_price is None or item["price_value"] <= max_price)]
+        
+        return self.results
         
         return self.results
 
