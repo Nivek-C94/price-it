@@ -1,6 +1,4 @@
 import threading
-import time
-import random
 from botasaurus_driver import driver
 from bs4 import BeautifulSoup
 import statistics
