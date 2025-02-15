@@ -14,4 +14,3 @@ def get_sold_items(
     """API endpoint to fetch sold eBay items."""
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
     return {"search_query": q, "results": results}
-    return {"search_query": q, "results": results}
