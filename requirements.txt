@@ -4,3 +4,4 @@ requests
 beautifulsoup4
 uvicorn
 botasaurus_driver
+fake_useragent
