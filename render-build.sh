@@ -12,8 +12,7 @@ wget -O /tmp/google/chrome/chrome.zip https://storage.googleapis.com/chrome-for-
 unzip /tmp/google/chrome/chrome.zip -d /tmp/google/chrome/
 chmod +x /tmp/google/chrome/chrome-linux64/chrome
 
-echo "🌐 Setting Chrome path..."
-export CHROME_PATH="/tmp/google/chrome/chrome-linux64/chrome"
-export GOOGLE_CHROME_SHIM="/tmp/google/chrome/chrome-linux64/chrome"
+echo "🌐 Creating a system-wide Chrome path for Botasaurus..."
+ln -sf /tmp/google/chrome/chrome-linux64/chrome /usr/bin/google-chrome || true
 
 echo "✅ Build completed successfully."
