@@ -14,5 +14,6 @@ chmod +x /tmp/google/chrome/chrome-linux64/chrome
 
 echo "🌐 Setting Chrome path..."
 export CHROME_PATH="/tmp/google/chrome/chrome-linux64/chrome"
+export GOOGLE_CHROME_SHIM="/tmp/google/chrome/chrome-linux64/chrome"
 
 echo "✅ Build completed successfully."
