@@ -7,5 +7,8 @@ app = FastAPI()
 # Include routes
 app.include_router(router)
 
+import os
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 8000))  # Use Render's assigned port
+    uvicorn.run(app, host="0.0.0.0", port=port)
