@@ -1,13 +1,18 @@
 #!/bin/bash
 
-# Install dependencies
-pip install -r requirements.txt
+set -e  # Exit on error
 
-# Download a pre-built Chrome binary
-mkdir -p /opt/google/chrome
-wget -O /opt/google/chrome/chrome.zip https://storage.googleapis.com/chrome-for-testing-public/122.0.6261.94/linux64/chrome-linux64.zip
-unzip /opt/google/chrome/chrome.zip -d /opt/google/chrome/
-chmod +x /opt/google/chrome/chrome-linux64/chrome
+echo "🚀 Updating pip and installing dependencies..."
+pip install --no-cache-dir --upgrade pip
+pip install --no-cache-dir --force-reinstall -r requirements.txt
 
-# Set Chrome binary path
-export CHROME_PATH="/opt/google/chrome/chrome-linux64/chrome"
+echo "📦 Downloading Chrome binary..."
+mkdir -p /tmp/google/chrome
+wget -O /tmp/google/chrome/chrome.zip https://storage.googleapis.com/chrome-for-testing-public/122.0.6261.94/linux64/chrome-linux64.zip
+unzip /tmp/google/chrome/chrome.zip -d /tmp/google/chrome/
+chmod +x /tmp/google/chrome/chrome-linux64/chrome
+
+echo "🌐 Setting Chrome path..."
+export CHROME_PATH="/tmp/google/chrome/chrome-linux64/chrome"
+
+echo "✅ Build completed successfully."
