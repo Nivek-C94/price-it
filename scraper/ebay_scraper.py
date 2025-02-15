@@ -2,8 +2,10 @@ import threading
 import urllib.parse
 import logging
 import re
+import os
 
 from botasaurus_driver import driver
+from botasaurus_driver.core import config
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
@@ -12,6 +14,8 @@ from scraper.utils import detect_price_outliers
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+chrome_binary_path = os.environ.get("CHROME_PATH", "/tmp/google/chrome/chrome-linux64/chrome")
 
 
 class EbayScraper:
@@ -27,6 +31,15 @@ class EbayScraper:
         specifics_filter = f"&_sop=12&{specifics}" if specifics else ""
         url = f"{self.base_url}?_nkw={query}&LH_Sold=1&LH_Complete=1{condition_filter}{specifics_filter}&_pgn={page}"
         ua = UserAgent()
+
+        # Force Botasaurus to use the correct Chrome binary path
+        def get_fixed_linux_executable_path():
+            return os.environ.get("CHROME_PATH", "/tmp/google/chrome/chrome-linux64/chrome")
+
+        # Override the default function in Botasaurus
+        config.get_linux_executable_path = get_fixed_linux_executable_path
+
+        # Now create the Driver instance
         bot = driver.Driver(user_agent=ua.random)
         try:
             bot.get(url)
