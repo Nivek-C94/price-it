@@ -19,4 +19,12 @@ export GOOGLE_CHROME_SHIM="/opt/render/project/.chrome/chrome-linux64/chrome"
 # Ensure Botasaurus can find Chrome
 ln -sf /opt/render/project/.chrome/chrome-linux64/chrome /usr/bin/google-chrome || true
 
+# Debug: Check if Chrome actually exists
+if [ ! -f "$CHROME_PATH" ]; then
+    echo "❌ Chrome installation failed! File not found: $CHROME_PATH"
+    exit 1
+else
+    echo "✅ Chrome installed successfully at $CHROME_PATH"
+fi
+
 echo "✅ Build completed successfully."
