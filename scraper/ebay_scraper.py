@@ -58,7 +58,7 @@ class EbayScraper:
         url = f"{self.base_url}?_nkw={query}&LH_Sold=1&LH_Complete=1{condition_filter}{specifics_filter}&_pgn={page}"
         ua = UserAgent()
 
-        bot = driver.Driver(user_agent=ua.random)
+        bot = driver.Driver(user_agent=ua.random, headless=True)
         try:
             bot.get(url)
             bot.wait_for_element(".s-item")
