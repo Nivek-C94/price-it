@@ -6,6 +6,6 @@ DEFAULT_HEADERS = {"User-Agent": USER_AGENT}
 # Number of pages to scrape on eBay (can be adjusted)
 SCRAPER_NUM_PAGES = 1
 # Number of Botasaurus drivers to spawn at startup
-SCRAPER_NUM_DRIVERS = 3
+SCRAPER_NUM_DRIVERS = 1
 # Outlier detection multiplier for the IQR method (default 1.5)
 OUTLIER_IQR_MULTIPLIER = 1.5
