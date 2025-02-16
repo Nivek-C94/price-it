@@ -61,7 +61,7 @@ class EbayScraper:
             self.driver_pool.put(bot)
         console.info("All drivers initialized and ready for requests.")
 
-        bot = self.driver_pool.get()  # Get a driver from the pool
+    def scrape_page(self, query, condition="", specifics="", page=1, exclude_parts=True):
         condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
         specifics_filter = f"&_sop=12&{specifics}" if specifics else ""
         url = f"{self.base_url}?_nkw={query}&LH_Sold=1&LH_Complete=1{condition_filter}{specifics_filter}&_pgn={page}"
