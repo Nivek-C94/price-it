@@ -42,7 +42,9 @@ def get_fixed_linux_executable_path():
 # Override Botasaurus's default function for obtaining the Chrome binary path.
 config.get_linux_executable_path = get_fixed_linux_executable_path
 
-class EbayScraper:
+import queue
+import threading
+from botasaurus_driver import driver
 
     def __init__(self):
         self.base_url = "https://www.ebay.com/sch/i.html"
