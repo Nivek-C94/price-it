@@ -44,7 +44,7 @@ config.get_linux_executable_path = get_fixed_linux_executable_path
 
 import queue
 import threading
-from botasaurus_driver import driver
+class EbayScraper:
 
     def __init__(self):
         self.base_url = "https://www.ebay.com/sch/i.html"
