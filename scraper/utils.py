@@ -3,15 +3,13 @@ import statistics
 
 def detect_price_outliers(items):
     """
-    Detects price anomalies using a combination of:
-    - Interquartile Range (IQR) method with an adaptive multiplier.
-    - Modified Z-Score method for better robustness.
-    - Mean-based deviation fallback for small datasets.
-
-    Outliers are marked if they are significantly different from the main price range.
+    Enhanced outlier detection using:
+    - Interquartile Range (IQR) method with dynamic multiplier
+    - Modified Z-Score method for robustness
+    - Dynamic fallback based on mean deviation for small datasets
     """
 
-    # Extract valid prices from items; prefer 'price_value' if available.
+    # Extract valid prices
     prices = []
     for item in items:
         try:
@@ -28,7 +26,7 @@ def detect_price_outliers(items):
         # Fallback: Use standard deviation for small datasets
         if n >= 2:
             mean_price = statistics.mean(prices)
-            std_dev = statistics.stdev(prices)
+            std_dev = statistics.stdev(prices) if n > 1 else 0
             threshold = 1.5 * std_dev  # More aggressive detection
 
             for item in items:
@@ -59,15 +57,15 @@ def detect_price_outliers(items):
     Q3 = median(prices_sorted[mid + (n % 2):])  # Ignore median in odd cases
     IQR = Q3 - Q1
 
-    # Dynamically adjust the multiplier based on dataset size
-    multiplier = 1.5 if n > 10 else 1.2 if n > 5 else 1.0
+    # Adjust IQR multiplier dynamically based on dataset size
+    multiplier = 1.8 if n > 10 else 1.5 if n > 5 else 1.2
     lower_bound = Q1 - multiplier * IQR
     upper_bound = Q3 + multiplier * IQR
 
-    # Modified Z-Score Method (for better skew resistance)
+    # Modified Z-Score Method
     median_price = median(prices_sorted)
     MAD = statistics.median([abs(p - median_price) for p in prices_sorted]) or 1
-    z_threshold = 3.5  # Higher sensitivity
+    z_threshold = 3.0  # Higher sensitivity
 
     for item in items:
         try:
@@ -75,6 +73,8 @@ def detect_price_outliers(items):
             iqr_outlier = (price_val < lower_bound) or (price_val > upper_bound)
             z_score = (0.6745 * (price_val - median_price)) / MAD
             z_outlier = abs(z_score) > z_threshold
+
+            # Mark as outlier if either method detects it
             item["outlier"] = iqr_outlier or z_outlier
         except Exception:
             item["outlier"] = None
