@@ -49,8 +49,10 @@ class EbayScraper:
     def __init__(self):
         self.base_url = "https://www.ebay.com/sch/i.html"
         self.lock = threading.Lock()
+        self.driver_pool = queue.Queue()
         self.results = []
         self.prices = []
+        self._initialize_drivers()
 
     def scrape_page(self, query, condition, specifics, page, exclude_parts):
         condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
