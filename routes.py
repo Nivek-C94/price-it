@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query
 from scraper.ebay_scraper import scraper
+from utils.log_manager import console
 
 router = APIRouter()
 
@@ -12,5 +13,6 @@ def get_sold_items(
     max_price: float = Query(None, title="Max Price", description="Maximum price filter"),
 ):
     """API endpoint to fetch sold eBay items."""
+    console.log("/Sold-items endpoint called, fetching results.")
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
     return {"search_query": q, "results": results}

@@ -10,10 +10,8 @@ from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
 from config import settings
-from scraper.utils import detect_price_outliers
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+from utils.log_manager import console
+from utils.utils import detect_price_outliers
 
 def get_fixed_linux_executable_path():
     """
@@ -24,7 +22,7 @@ def get_fixed_linux_executable_path():
     # Check the environment variable first
     chrome_path = os.environ.get("CHROME_PATH")
     if chrome_path and os.path.exists(chrome_path):
-        logger.info(f"Using Chrome binary from CHROME_PATH: {chrome_path}")
+        console.info(f"Using Chrome binary from CHROME_PATH: {chrome_path}")
         return chrome_path
 
     # Fallback candidate paths
@@ -35,10 +33,10 @@ def get_fixed_linux_executable_path():
     ]
     for path in fallback_paths:
         if os.path.exists(path):
-            logger.info(f"Found Chrome binary at fallback path: {path}")
+            console.info(f"Found Chrome binary at fallback path: {path}")
             return path
 
-    logger.error("Chrome executable not found. Please set the CHROME_PATH environment variable to a valid Chrome binary path.")
+    console.error("Chrome executable not found. Please set the CHROME_PATH environment variable to a valid Chrome binary path.")
     return ""  # Return empty string if not found
 
 # Override Botasaurus's default function for obtaining the Chrome binary path.
@@ -64,7 +62,7 @@ class EbayScraper:
             bot.wait_for_element(".s-item")
             html_source = bot.page_html
         except Exception as e:
-            logger.error(f"Error fetching page {page}: {e}")
+            console.error(f"Error fetching page {page}: {e}")
             return
         finally:
             bot.close()
@@ -119,11 +117,12 @@ class EbayScraper:
                     "display_image": f"![]({image_url})"
                 })
             except Exception as e:
-                logger.error(f"Skipping item due to error: {e}")
+                console.error(f"Skipping item due to error: {e}")
 
         with self.lock:
             self.results.extend(local_results)
             self.prices.extend(local_prices)
+            bot.close()
 
     def scrape_ebay_sold(self, query, condition="", specifics="", min_price=None, max_price=None, exclude_parts=True):
         # URL-encode query and specifics
