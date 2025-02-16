@@ -56,10 +56,20 @@ class EbayScraper:
         """Initialize a fixed number of persistent Botasaurus drivers."""
         num_drivers = getattr(settings, "SCRAPER_NUM_DRIVERS", 3)
         console.info(f"Spawning {num_drivers} persistent Botasaurus drivers...")
+
         for _ in range(num_drivers):
             bot = driver.Driver(user_agent=UserAgent().random, headless=True)
             self.driver_pool.put(bot)
         console.info("All drivers initialized and ready for requests.")
+
+    def _check_driver_health(self, bot):
+        """Ensure the driver is still running and responsive."""
+        try:
+            bot.get("about:blank")  # Quick test request
+            return True
+        except Exception:
+            console.error("A Botasaurus driver has failed and will be replaced.")
+            return False
 
     def scrape_page(self, query, condition="", specifics="", page=1, exclude_parts=True):
         condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
