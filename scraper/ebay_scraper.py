@@ -133,7 +133,7 @@ class EbayScraper:
         with self.lock:
             self.results.extend(local_results)
             self.prices.extend(local_prices)
-            bot.close()
+            self.driver_pool.put(bot)  # Return the driver to the pool
 
     def scrape_ebay_sold(self, query, condition="", specifics="", min_price=None, max_price=None, exclude_parts=True):
         # URL-encode query and specifics
