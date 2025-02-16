@@ -114,7 +114,7 @@ class EbayScraper:
                     "image_url":     image_url,
                     "item_url":      item_url,
                     "specifics":     specifics_text,
-                    "display_image": f"![]({image_url})"
+                    "display_image": f"![Image]({image_url})"
                 })
             except Exception as e:
                 console.error(f"Skipping item due to error: {e}")
