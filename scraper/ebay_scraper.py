@@ -52,7 +52,14 @@ class EbayScraper:
         self.driver_pool = queue.Queue()
         self.results = []
         self.prices = []
-        self._initialize_drivers()
+    def _initialize_drivers(self):
+        """Initialize a fixed number of persistent Botasaurus drivers."""
+        num_drivers = getattr(settings, "SCRAPER_NUM_DRIVERS", 3)
+        console.info(f"Spawning {num_drivers} persistent Botasaurus drivers...")
+        for _ in range(num_drivers):
+            bot = driver.Driver(user_agent=UserAgent().random, headless=True)
+            self.driver_pool.put(bot)
+        console.info("All drivers initialized and ready for requests.")
 
     def scrape_page(self, query, condition, specifics, page, exclude_parts):
         condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
