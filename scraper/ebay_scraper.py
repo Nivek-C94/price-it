@@ -15,8 +15,34 @@ from scraper.utils import detect_price_outliers
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-chrome_binary_path = os.environ.get("CHROME_PATH", "/tmp/google/chrome/chrome-linux64/chrome")
+def get_fixed_linux_executable_path():
+    """
+    Determines the Chrome executable to use.
+    First, it checks the CHROME_PATH environment variable.
+    If not set or the file does not exist, it searches common paths.
+    """
+    # Check the environment variable first
+    chrome_path = os.environ.get("CHROME_PATH")
+    if chrome_path and os.path.exists(chrome_path):
+        logger.info(f"Using Chrome binary from CHROME_PATH: {chrome_path}")
+        return chrome_path
 
+    # Fallback candidate paths
+    fallback_paths = [
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium-browser",
+        "/usr/bin/chrome"
+    ]
+    for path in fallback_paths:
+        if os.path.exists(path):
+            logger.info(f"Found Chrome binary at fallback path: {path}")
+            return path
+
+    logger.error("Chrome executable not found. Please set the CHROME_PATH environment variable to a valid Chrome binary path.")
+    return ""  # Return empty string if not found
+
+# Override Botasaurus's default function for obtaining the Chrome binary path.
+config.get_linux_executable_path = get_fixed_linux_executable_path
 
 class EbayScraper:
 
@@ -32,14 +58,6 @@ class EbayScraper:
         url = f"{self.base_url}?_nkw={query}&LH_Sold=1&LH_Complete=1{condition_filter}{specifics_filter}&_pgn={page}"
         ua = UserAgent()
 
-        # Force Botasaurus to use the correct Chrome binary path
-        def get_fixed_linux_executable_path():
-            return os.environ.get("CHROME_PATH", "/tmp/google/chrome/chrome-linux64/chrome")
-
-        # Override the default function in Botasaurus
-        config.get_linux_executable_path = get_fixed_linux_executable_path
-
-        # Now create the Driver instance
         bot = driver.Driver(user_agent=ua.random)
         try:
             bot.get(url)
@@ -79,8 +97,7 @@ class EbayScraper:
 
                 specifics_elem = item.select_one(".s-item__subtitle")
                 specifics_text = specifics_elem.get_text(strip=True) if specifics_elem else "No Details"
-                condition_text = specifics_text.split("\u00b7")[
-                    0].strip() if "\u00b7" in specifics_text else specifics_text
+                condition_text = specifics_text.split("\u00b7")[0].strip() if "\u00b7" in specifics_text else specifics_text
 
                 if exclude_parts and "Parts Only" in condition_text:
                     continue  # Skip parts-only listings if specified
