@@ -7,4 +7,4 @@ DEFAULT_HEADERS = {"User-Agent": USER_AGENT}
 SCRAPER_NUM_PAGES = 1
 
 # Outlier detection multiplier for the IQR method (default 1.5)
-OUTLIER_IQR_MULTIPLIER = 1.5
+OUTLIER_IQR_MULTIPLIER = 0.5
