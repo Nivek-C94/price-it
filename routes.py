@@ -15,4 +15,8 @@ def get_sold_items(
     """API endpoint to fetch sold eBay items."""
     console.info("/Sold-items endpoint called, fetching results.")
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
-    return {"search_query": q, "results": results}
+@router.post("/list-item")
+def post_item(item_data: dict):
+    """API endpoint to list an item on eBay."""
+    result = list_item_on_ebay(item_data)
+    return result
