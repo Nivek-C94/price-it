@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 from scraper.ebay_scraper import scraper
 from utils.log_manager import console
-
+from scraper.ebay_poster import list_item_on_ebay
 router = APIRouter()
 
 @router.get("/sold-items")
