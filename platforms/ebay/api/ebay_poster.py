@@ -11,25 +11,34 @@ EBAY_ENV = "PRODUCTION"
 # OAuth endpoints
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token" if EBAY_ENV == "PRODUCTION" else "https://api.sandbox.ebay.com/identity/v1/oauth2/token"
 
+from config.oauth2_manager import get_auth_url, fetch_tokens, refresh_access_token
+import json
+
+# Load tokens from a local file or environment
+TOKEN_STORAGE = "config/ebay_tokens.json"
+
+def load_tokens():
+    try:
+        with open(TOKEN_STORAGE, "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
+
+def save_tokens(tokens):
+    with open(TOKEN_STORAGE, "w") as file:
+        json.dump(tokens, file)
+
 def get_ebay_access_token():
-    """Obtain an OAuth2 token from eBay."""
-    auth_header = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
-    headers = {
-        "Authorization": f"Basic {auth_header}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-
-    data = {
-        "grant_type": "client_credentials",
-        "scope": "https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.inventory"
-    }
-
-    response = requests.post(TOKEN_URL, headers=headers, data=data)
-
-    if response.status_code == 200:
-        return response.json()["access_token"]
-    else:
-        raise Exception(f"Failed to get OAuth token: {response.text}")
+    tokens = load_tokens()
+    
+    if "access_token" in tokens:
+        return tokens["access_token"]
+    
+    print("Go to this URL to authorize:", get_auth_url())
+    auth_code = input("Enter the authorization code: ")
+    new_tokens = fetch_tokens(auth_code)
+    save_tokens(new_tokens)
+    return new_tokens["access_token"]
 
 def sanitize_sku(sku):
     """Ensure SKU is valid by removing special characters and truncating if necessary."""
