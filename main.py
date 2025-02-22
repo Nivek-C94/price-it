@@ -21,9 +21,11 @@ app.include_router(router)
 
 '''
 
-uvicorn main:app --host 0.0.0.0 --port 443 --ssl-keyfile ssl\privkey.pem --ssl-certfile "ssl\fullchain.pem"
+Run as admin
+
+uvicorn main:app --host 0.0.0.0 --port 443 --ssl-keyfile "ssl\\privkey.pem" --ssl-certfile "ssl\\fullchain.pem"
 
 '''
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 80))  # Use assigned port (e.g. Render's port)
-    uvicorn.run(app, host="0.0.0.0", port=port, ssl_keyfile="ssl\\privkey.pem", ssl_certfile="ssl\\fullchain.pem")
+    port = int(os.environ.get("PORT", 443))  # Use assigned port (e.g. Render's port)
+    uvicorn.run(app, host="0.0.0.0", port=443, ssl_keyfile="ssl\\privkey.pem", ssl_certfile="ssl\\fullchain.pem")

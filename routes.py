@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Query
-from scraper.ebay_scraper import scraper
+from platforms.ebay.ebay_scraper import scraper
 from utils.log_manager import console
-from scraper.ebay_poster import list_item_on_ebay
 router = APIRouter()
 
 @router.get("/sold-items")
@@ -17,8 +16,3 @@ def get_sold_items(
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
     return {"search_query": q, "results": results}
 
-@router.post("/list-item")
-def post_item(item_data: dict):
-    """API endpoint to list an item on eBay."""
-    result = list_item_on_ebay(item_data)
-    return result
