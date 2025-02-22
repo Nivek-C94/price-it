@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query
-from platforms.ebay.ebay_scraper import scraper
+from platforms.ebay.automation.ebay_scraper import scraper
 from utils.log_manager import console
 router = APIRouter()
 
