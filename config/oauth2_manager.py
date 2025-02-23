@@ -23,10 +23,10 @@ TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
 STATE_STORAGE = os.getenv("STATE_STORAGE_PATH", "config/oauth_state.json")
 
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
-    # Ensure the config directory exists
-    if not os.path.exists("config"):
-        os.makedirs("config")
+    os.makedirs("config", exist_ok=True)  # Ensure the config directory exists
     ENCRYPTION_KEY = Fernet.generate_key().decode()
+    with open("config/encryption_key.txt", "w") as key_file:
+        key_file.write(ENCRYPTION_KEY)
     with open("config/encryption_key.txt", "w") as key_file:
         key_file.write(ENCRYPTION_KEY)
 cipher = Fernet(ENCRYPTION_KEY.encode())
