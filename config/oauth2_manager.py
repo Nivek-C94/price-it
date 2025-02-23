@@ -11,9 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-CLIENT_ID = os.getenv("EBAY_CLIENT_ID")
-CLIENT_SECRET = os.getenv("EBAY_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("EBAY_REDIRECT_URI")
+CLIENT_ID = "RobitRep-SnapNSel-PRD-8298f5758-ea82f57f"
+CLIENT_SECRET = "PRD-298f5758b408-05cb-47f5-bc2b-dc80"
+REDIRECT_URI = "https://snap-n-sell.duckdns.org/auth/accepted"
 EBAY_AUTH_URL = "https://auth.ebay.com/oauth2/authorize"
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
 SCOPES = "https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.inventory"
