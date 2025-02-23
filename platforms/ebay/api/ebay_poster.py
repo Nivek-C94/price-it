@@ -4,17 +4,13 @@ import json
 import re
 
 # eBay API credentials (replace with your actual keys)
-CLIENT_ID = "RobitRep-SnapNSel-PRD-8298f5758-ea82f57f"
-CLIENT_SECRET = "c8f5f942-c595-4548-9166-207db4bcb30a"
-REDIRECT_URI = "https://snap-n-sell.duckdns.org/auth/accepted"
-EBAY_ENV = "PRODUCTION"
+from config.oauth2_manager import load_tokens, save_tokens, refresh_access_token
 
 # OAuth endpoints
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token" if EBAY_ENV == "PRODUCTION" else "https://api.sandbox.ebay.com/identity/v1/oauth2/token"
 
 # Load tokens from a local file or environment
-TOKEN_STORAGE = "config/ebay_tokens.json"
-
+TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
 def load_tokens():
     try:
         with open(TOKEN_STORAGE, "r") as file:
@@ -32,11 +28,10 @@ def get_ebay_access_token():
     if "access_token" in tokens:
         return tokens["access_token"]
     
-    print("Go to this URL to authorize:", get_auth_url())
-    auth_code = input("Enter the authorization code: ")
-    new_tokens = fetch_tokens(auth_code)
-    save_tokens(new_tokens)
-    return new_tokens["access_token"]
+    if "refresh_token" in tokens:
+        return refresh_access_token(tokens["refresh_token"])
+    
+    raise Exception("No valid access or refresh token found. Authenticate the application first.")
 
 def sanitize_sku(sku):
     """Ensure SKU is valid by removing special characters and truncating if necessary."""
