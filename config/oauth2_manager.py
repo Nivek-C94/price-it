@@ -19,15 +19,15 @@ EBAY_AUTH_URL = "https://auth.ebay.com/oauth2/authorize"
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
 SCOPES = "https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.inventory"
 
-TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
-STATE_STORAGE = os.getenv("STATE_STORAGE_PATH", "config/oauth_state.json")
+TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "resources/ebay_tokens.json")
+STATE_STORAGE = os.getenv("STATE_STORAGE_PATH", "resources/oauth_state.json")
 
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
-    os.makedirs("config", exist_ok=True)  # Ensure the config directory exists
+    # Ensure the resources directory exists
+    if not os.path.exists("resources"):
+        os.makedirs("resources")
     ENCRYPTION_KEY = Fernet.generate_key().decode()
-    with open("config/encryption_key.txt", "w") as key_file:
-        key_file.write(ENCRYPTION_KEY)
-    with open("config/encryption_key.txt", "w") as key_file:
+    with open("resources/encryption_key.txt", "w") as key_file:
         key_file.write(ENCRYPTION_KEY)
 cipher = Fernet(ENCRYPTION_KEY.encode())
 
