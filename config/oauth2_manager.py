@@ -11,18 +11,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-CLIENT_ID = "RobitRep-SnapNSel-PRD-8298f5758-ea82f57f"
-CLIENT_SECRET = "PRD-298f5758b408-05cb-47f5-bc2b-dc80"
+CLIENT_ID = os.getenv("EBAY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("EBAY_CLIENT_SECRET")
 REDIRECT_URI = "https://snap-n-sell.duckdns.org/auth/accepted"
 EBAY_AUTH_URL = "https://auth.ebay.com/oauth2/authorize"
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
 SCOPES = "https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.inventory"
 
-TOKEN_STORAGE = "config/ebay_tokens.json"
-STATE_STORAGE = "config/oauth_state.json"
+TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
+STATE_STORAGE = os.getenv("STATE_STORAGE_PATH", "config/oauth_state.json")
 
 # Load or generate encryption key
-ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY") or Fernet.generate_key().decode()
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
+if not ENCRYPTION_KEY:
+    raise ValueError("Missing encryption key")
+cipher = Fernet(ENCRYPTION_KEY.encode())
 cipher = Fernet(ENCRYPTION_KEY.encode())
 
 def load_tokens():
@@ -42,22 +45,17 @@ def save_tokens(tokens):
 # CSRF Protection: Generate and Validate State
 
 def generate_state():
-    state = os.urandom(16).hex()
-    with open(STATE_STORAGE, "w") as file:
-        json.dump({"state": state}, file)
+    state = base64.urlsafe_b64encode(os.urandom(32)).decode()
     return state
 
-def validate_state(received_state):
-    try:
-        with open(STATE_STORAGE, "r") as file:
-            stored_state = json.load(file).get("state")
-            return received_state == stored_state
-    except FileNotFoundError:
-        return False
+def validate_state(received_state, expected_state):
+    return received_state == expected_state
 
 def get_auth_url():
     state = generate_state()
-    ebay = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPES, state=state)
+    code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode().rstrip("=")
+    code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest()).decode().rstrip("=")
+    ebay = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPES, state=state, code_challenge=code_challenge, code_challenge_method="S256")
     auth_url, _ = ebay.authorization_url(EBAY_AUTH_URL)
     return auth_url
 
