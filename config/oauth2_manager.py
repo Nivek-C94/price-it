@@ -22,10 +22,12 @@ SCOPES = "https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_sc
 TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
 STATE_STORAGE = os.getenv("STATE_STORAGE_PATH", "config/oauth_state.json")
 
-# Load or generate encryption key
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 if not ENCRYPTION_KEY:
-    raise ValueError("Missing encryption key")
+    ENCRYPTION_KEY = Fernet.generate_key().decode()
+    with open("config/encryption_key.txt", "w") as key_file:
+        key_file.write(ENCRYPTION_KEY)
+cipher = Fernet(ENCRYPTION_KEY.encode())
 cipher = Fernet(ENCRYPTION_KEY.encode())
 
 def load_tokens():
