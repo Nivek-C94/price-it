@@ -28,7 +28,6 @@ if not ENCRYPTION_KEY:
     with open("config/encryption_key.txt", "w") as key_file:
         key_file.write(ENCRYPTION_KEY)
 cipher = Fernet(ENCRYPTION_KEY.encode())
-cipher = Fernet(ENCRYPTION_KEY.encode())
 
 def load_tokens():
     try:

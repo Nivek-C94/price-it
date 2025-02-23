@@ -1,13 +1,13 @@
 import requests
-from config.oauth2_manager import get_auth_url, fetch_tokens, refresh_access_token
 import json
 import re
+import os
 
 # eBay API credentials (replace with your actual keys)
 from config.oauth2_manager import load_tokens, save_tokens, refresh_access_token
 
 # OAuth endpoints
-TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token" if EBAY_ENV == "PRODUCTION" else "https://api.sandbox.ebay.com/identity/v1/oauth2/token"
+TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
 
 # Load tokens from a local file or environment
 TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
