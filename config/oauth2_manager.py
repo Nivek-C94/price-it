@@ -4,6 +4,7 @@ import base64
 import logging
 import json
 import time
+import hashlib
 import cryptography.fernet
 from cryptography.fernet import Fernet
 from requests_oauthlib import OAuth2Session
@@ -25,7 +26,6 @@ STATE_STORAGE = os.getenv("STATE_STORAGE_PATH", "config/oauth_state.json")
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 if not ENCRYPTION_KEY:
     raise ValueError("Missing encryption key")
-cipher = Fernet(ENCRYPTION_KEY.encode())
 cipher = Fernet(ENCRYPTION_KEY.encode())
 
 def load_tokens():
