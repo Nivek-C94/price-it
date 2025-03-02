@@ -24,9 +24,9 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
 
     data = {
         "sku": sanitize_sku(sku),
-        "product": {"title": title},
+        "product": {"title": title, "aspects": specifics},
         "condition": condition,
-        "specifics": specifics,
+        "price": {"value": price, "currency": "USD"}
 
     response = requests.put(url, json=data, headers=headers)
 
