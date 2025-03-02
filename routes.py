@@ -15,4 +15,13 @@ def get_sold_items(
     """API endpoint to fetch sold eBay items."""
     console.info("/Sold-items endpoint called, fetching results.")
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
+
+@router.get("/mercari-sold-items")
+def get_mercari_sold_items(
+    q: str = Query(..., title="Search Query", description="Enter Mercari search query"),
+    num_pages: int = Query(3, title="Number of Pages", description="Number of pages to scrape"),
+):
+    """API endpoint to fetch sold Mercari items."""
+    console.info("/mercari-sold-items endpoint called, fetching results.")
+    results = mercari_scraper.scrape_mercari_sold(q, num_pages)
     return {"search_query": q, "results": results}
