@@ -41,12 +41,15 @@ def get_mercari_sold_items(
 
 @router.post("/sell-item")
 def sell_item(
+    sku: str = Query(..., title="SKU", description="Stock Keeping Unit for eBay"),
     title: str = Query(..., title="Item Title", description="Title of the item to sell"),
     price: float = Query(..., title="Price", description="Price of the item in USD"),
     condition: str = Query("New", title="Condition", description="Condition of the item"),
-    specifics: str = Query("", title="Item Specifics", description="Additional details such as brand, color, etc."),
+    specifics: dict = Query({}, title="Item Specifics", description="Additional details such as brand, color, etc."),
+):
 ):
     """API endpoint to post an item for sale on eBay."""
-    console.info("/sell-item endpoint called, posting item to eBay.")
-    response = post_ebay_inventory_item(title, price, condition, specifics)
+    console.info(f"/sell-item endpoint called: SKU={sku}, Title={title}, Price={price}, Condition={condition}, Specifics={specifics}")
+    sanitized_sku = sanitize_sku(sku)
+    response = post_ebay_inventory_item(sanitized_sku, title, price, condition, specifics)
     return {"status": "success", "response": response}
