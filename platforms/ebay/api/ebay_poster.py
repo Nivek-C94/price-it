@@ -1,9 +1,10 @@
 import requests
 import json
 import re
-import os
+import time
 
 from config import oauth2_manager
+from config.oauth2_manager import get_ebay_access_token
 
 
 def sanitize_sku(sku):
@@ -14,8 +15,6 @@ def sanitize_sku(sku):
 
 def post_ebay_inventory_item(sku, title, price):
     """Post an item to eBay using a valid OAuth2 token."""
-    print(oauth2_manager.get_auth_url())
-    time.sleep(10)
     access_token = get_ebay_access_token()  # Get a fresh OAuth2 token
     url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{sanitize_sku(sku)}"
 

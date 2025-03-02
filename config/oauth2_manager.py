@@ -35,7 +35,26 @@ if not ENCRYPTION_KEY:
 cipher = Fernet(ENCRYPTION_KEY.encode())
 
 
+def load_tokens():
+    """Load encrypted tokens from storage."""
+    try:
+        with open(TOKEN_STORAGE, "rb") as file:
+            encrypted_data = file.read()
+            decrypted_data = cipher.decrypt(encrypted_data).decode()
+            return json.loads(decrypted_data)
+    except (FileNotFoundError, cryptography.fernet.InvalidToken):
+        return {}
+
+def save_tokens(tokens):
+    """Save encrypted tokens securely."""
+    encrypted_data = cipher.encrypt(json.dumps(tokens).encode())
+    with open(TOKEN_STORAGE, "wb") as file:
+        file.write(encrypted_data)
+
+
+
 def get_ebay_access_token():
+    """Retrieve a valid access token or prompt for login if unavailable."""
     tokens = load_tokens()
 
     if "access_token" in tokens:
@@ -44,9 +63,10 @@ def get_ebay_access_token():
     if "refresh_token" in tokens:
         return refresh_access_token(tokens["refresh_token"])
 
-    # Instead of raising an error, return the login URL
+    # Return login URL if authentication is required
     login_url = get_auth_url()
     return {"error": "User not logged in", "login_url": login_url}
+
 
 
 def save_tokens(tokens):
@@ -117,7 +137,12 @@ def fetch_tokens(auth_code, state):
 
 
 def refresh_access_token(refresh_token):
-    data = {"grant_type": "refresh_token", "refresh_token": refresh_token}
+    """Refresh the access token using eBay's OAuth2 API."""
+    data = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+        "scope": SCOPES,
+    }
     auth_header = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
     headers = {
         "Authorization": f"Basic {auth_header}",
@@ -128,16 +153,18 @@ def refresh_access_token(refresh_token):
         response = requests.post(TOKEN_URL, headers=headers, data=data)
         response.raise_for_status()
         token_data = response.json()
+
         if "access_token" in token_data:
-            logging.info("Access token refreshed successfully.")
+            logging.info("✅ Access token refreshed successfully.")
             tokens = load_tokens()
             tokens["access_token"] = token_data["access_token"]
             tokens["refresh_token"] = token_data.get("refresh_token", refresh_token)
             save_tokens(tokens)
             return token_data["access_token"]
         else:
-            logging.error("No access token returned: %s", token_data)
+            logging.error("⚠️ No access token returned: %s", token_data)
             raise Exception("Invalid token response.")
     except requests.exceptions.RequestException as e:
-        logging.error("Token refresh failed: %s", str(e))
+        logging.error("🚨 Token refresh failed: %s", str(e))
         raise Exception("Failed to refresh token.")
+
