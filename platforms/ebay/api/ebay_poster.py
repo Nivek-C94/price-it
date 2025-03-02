@@ -21,7 +21,7 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
         print(f"🔗 Please log in here: {access_token['login_url']}")
         return False  # Indicate that authentication is needed
 
-    url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{sanitize_sku(sku)}"
+    url = "https://api.ebay.com/sell/inventory/v1/inventory_item/" + sanitize_sku(sku)
 
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -33,15 +33,17 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
         "sku": sanitize_sku(sku),
         "product": {"title": title, "aspects": specifics},
         "condition": condition,
+        "availability": {"shipToLocationAvailability": {"quantity": 1}},
         "price": {"value": price, "currency": "USD"}
+    }
 
     }
     for attempt in range(3):
         response = requests.put(url, json=data, headers=headers)
 
-        if response.status_code in [200, 201]:
+        if response.status_code in [200, 201, 204]:
             print("✅ Item posted successfully:", response.json())
-            return True
+            return response.json()
 
         elif response.status_code in [500, 502, 503, 504]:
             print(f"⚠️ Temporary error ({response.status_code}). Retrying in {2**attempt} seconds...")
