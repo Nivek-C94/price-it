@@ -10,10 +10,13 @@ from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from requests_oauthlib import OAuth2Session
 
+# Load environment variables
 load_dotenv()
 
 CLIENT_ID = os.getenv('EBAY_CLIENT_ID')
 CLIENT_SECRET = os.getenv("EBAY_CLIENT_SECRET")
+print(CLIENT_ID)
+print(CLIENT_SECRET)
 REDIRECT_URI = "https://snap-n-sell.duckdns.org/auth/accepted"
 EBAY_AUTH_URL = "https://auth.ebay.com/oauth2/authorize"
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
