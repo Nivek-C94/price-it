@@ -35,7 +35,7 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
         "condition": condition,
         "price": {"value": price, "currency": "USD"}
 
-    # Retry mechanism for temporary errors
+    }
     for attempt in range(3):
         response = requests.put(url, json=data, headers=headers)
 
