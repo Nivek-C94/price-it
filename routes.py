@@ -36,4 +36,15 @@ def get_mercari_sold_items(
     """API endpoint to fetch sold Mercari items."""
     console.info("/mercari-sold-items endpoint called, fetching results.")
     results = mercari_scraper.scrape_mercari_sold(q, num_pages)
-    return {"search_query": q, "results": results}
+
+@router.post("/sell-item")
+def sell_item(
+    title: str = Query(..., title="Item Title", description="Title of the item to sell"),
+    price: float = Query(..., title="Price", description="Price of the item in USD"),
+    condition: str = Query("New", title="Condition", description="Condition of the item"),
+    specifics: str = Query("", title="Item Specifics", description="Additional details such as brand, color, etc."),
+):
+    """API endpoint to post an item for sale on eBay."""
+    console.info("/sell-item endpoint called, posting item to eBay.")
+    response = post_ebay_inventory_item(title, price, condition, specifics)
+    return {"status": "success", "response": response}
