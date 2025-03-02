@@ -12,7 +12,7 @@ from requests_oauthlib import OAuth2Session
 
 load_dotenv()
 
-CLIENT_ID = os.getenv("RobitRep-SnapNSel-SBX-15ada24c3-ebb5d66e")
+CLIENT_ID = os.getenv('EBAY_CLIENT_ID')
 CLIENT_SECRET = os.getenv("EBAY_CLIENT_SECRET")
 REDIRECT_URI = "https://snap-n-sell.duckdns.org/auth/accepted"
 EBAY_AUTH_URL = "https://auth.ebay.com/oauth2/authorize"
@@ -80,7 +80,6 @@ def get_auth_url():
         redirect_uri=REDIRECT_URI,
         scope=SCOPES,
         state=state,
-    )
     )
     auth_url, _ = ebay.authorization_url(EBAY_AUTH_URL)
     return auth_url

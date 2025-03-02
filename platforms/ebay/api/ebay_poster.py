@@ -1,43 +1,9 @@
-import json
-import os
-import re
 import requests
+import json
+import re
+import os
 
-# eBay API credentials (replace with your actual keys)
-from config.oauth2_manager import load_tokens, save_tokens, refresh_access_token
-
-# OAuth endpoints
-TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
-
-# Load tokens from a local file or environment
-TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
-
-
-def load_tokens():
-    try:
-        with open(TOKEN_STORAGE, "r") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {}
-
-
-def save_tokens(tokens):
-    with open(TOKEN_STORAGE, "w") as file:
-        json.dump(tokens, file)
-
-
-def get_ebay_access_token():
-    tokens = load_tokens()
-
-    if "access_token" in tokens:
-        return tokens["access_token"]
-
-    if "refresh_token" in tokens:
-        return refresh_access_token(tokens["refresh_token"])
-
-    # Instead of raising an error, return the login URL
-    login_url = get_auth_url()
-    return {"error": "User not logged in", "login_url": login_url}
+from config import oauth2_manager
 
 
 def sanitize_sku(sku):
@@ -48,6 +14,8 @@ def sanitize_sku(sku):
 
 def post_ebay_inventory_item(sku, title, price):
     """Post an item to eBay using a valid OAuth2 token."""
+    print(oauth2_manager.get_auth_url())
+    time.sleep(10)
     access_token = get_ebay_access_token()  # Get a fresh OAuth2 token
     url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{sanitize_sku(sku)}"
 
