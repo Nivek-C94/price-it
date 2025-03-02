@@ -1,7 +1,7 @@
-import requests
 import json
-import re
 import os
+import re
+import requests
 
 # eBay API credentials (replace with your actual keys)
 from config.oauth2_manager import load_tokens, save_tokens, refresh_access_token
@@ -35,9 +35,9 @@ def get_ebay_access_token():
     if "refresh_token" in tokens:
         return refresh_access_token(tokens["refresh_token"])
 
-    raise Exception(
-        "No valid access or refresh token found. Authenticate the application first."
-    )
+    # Instead of raising an error, return the login URL
+    login_url = get_auth_url()
+    return {"error": "User not logged in", "login_url": login_url}
 
 
 def sanitize_sku(sku):
