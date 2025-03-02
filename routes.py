@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query
-from platforms.ebay.automation.ebay_scraper import scraper
+from platforms.mercari.automation.mercari_scraper import scraper as mercari_scraper
 from utils.log_manager import console
+
 router = APIRouter()
 
 @router.get("/sold-items")
@@ -15,4 +16,3 @@ def get_sold_items(
     console.info("/Sold-items endpoint called, fetching results.")
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
     return {"search_query": q, "results": results}
-
