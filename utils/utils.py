@@ -31,7 +31,9 @@ def detect_price_outliers(items):
 
             for item in items:
                 try:
-                    price_val = item.get("price_value") or float(item["price"].replace("$", "").replace(",", ""))
+                    price_val = item.get("price_value") or float(
+                        item["price"].replace("$", "").replace(",", "")
+                    )
                     item["outlier"] = abs(price_val - mean_price) > threshold
                 except Exception:
                     item["outlier"] = None
@@ -54,7 +56,7 @@ def detect_price_outliers(items):
     # Split into quartiles
     mid = n // 2
     Q1 = median(prices_sorted[:mid])
-    Q3 = median(prices_sorted[mid + (n % 2):])  # Ignore median in odd cases
+    Q3 = median(prices_sorted[mid + (n % 2) :])  # Ignore median in odd cases
     IQR = Q3 - Q1
 
     # Adjust IQR multiplier dynamically based on dataset size
@@ -69,7 +71,9 @@ def detect_price_outliers(items):
 
     for item in items:
         try:
-            price_val = item.get("price_value") or float(item["price"].replace("$", "").replace(",", ""))
+            price_val = item.get("price_value") or float(
+                item["price"].replace("$", "").replace(",", "")
+            )
             iqr_outlier = (price_val < lower_bound) or (price_val > upper_bound)
             z_score = (0.6745 * (price_val - median_price)) / MAD
             z_outlier = abs(z_score) > z_threshold

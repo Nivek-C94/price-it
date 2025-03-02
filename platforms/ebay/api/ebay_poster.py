@@ -11,6 +11,8 @@ TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
 
 # Load tokens from a local file or environment
 TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "config/ebay_tokens.json")
+
+
 def load_tokens():
     try:
         with open(TOKEN_STORAGE, "r") as file:
@@ -18,25 +20,31 @@ def load_tokens():
     except FileNotFoundError:
         return {}
 
+
 def save_tokens(tokens):
     with open(TOKEN_STORAGE, "w") as file:
         json.dump(tokens, file)
 
+
 def get_ebay_access_token():
     tokens = load_tokens()
-    
+
     if "access_token" in tokens:
         return tokens["access_token"]
-    
+
     if "refresh_token" in tokens:
         return refresh_access_token(tokens["refresh_token"])
-    
-    raise Exception("No valid access or refresh token found. Authenticate the application first.")
+
+    raise Exception(
+        "No valid access or refresh token found. Authenticate the application first."
+    )
+
 
 def sanitize_sku(sku):
     """Ensure SKU is valid by removing special characters and truncating if necessary."""
-    sku = re.sub(r'[^a-zA-Z0-9]', '', sku)  # Remove non-alphanumeric characters
+    sku = re.sub(r"[^a-zA-Z0-9]", "", sku)  # Remove non-alphanumeric characters
     return sku[:50]  # Trim to max 50 characters
+
 
 def post_ebay_inventory_item(sku, title, price):
     """Post an item to eBay using a valid OAuth2 token."""
@@ -46,18 +54,13 @@ def post_ebay_inventory_item(sku, title, price):
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
-        "Accept": "application/json"
+        "Accept": "application/json",
     }
 
     data = {
         "sku": sanitize_sku(sku),
-        "product": {
-            "title": title
-        },
-        "price": {
-            "value": price,
-            "currency": "USD"
-        }
+        "product": {"title": title},
+        "price": {"value": price, "currency": "USD"},
     }
 
     response = requests.put(url, json=data, headers=headers)
@@ -66,6 +69,7 @@ def post_ebay_inventory_item(sku, title, price):
         print("Item posted successfully:", response.json())
     else:
         print("Error:", response.text)
+
 
 if __name__ == "__main__":
     try:
