@@ -1,11 +1,9 @@
-import requests
 import json
 import re
+import requests
 import time
-
 from config import oauth2_manager
 from config.oauth2_manager import get_ebay_access_token
-
 
 def sanitize_sku(sku):
     """Ensure SKU is valid by removing special characters and truncating if necessary."""
@@ -13,7 +11,7 @@ def sanitize_sku(sku):
     return sku[:50]  # Trim to max 50 characters
 
 
-def post_ebay_inventory_item(sku, title, price):
+def post_ebay_inventory_item(sku, title, price, condition, specifics):
     """Post an item to eBay using a valid OAuth2 token."""
     access_token = get_ebay_access_token()  # Get a fresh OAuth2 token
     url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{sanitize_sku(sku)}"
@@ -27,8 +25,8 @@ def post_ebay_inventory_item(sku, title, price):
     data = {
         "sku": sanitize_sku(sku),
         "product": {"title": title},
-        "price": {"value": price, "currency": "USD"},
-    }
+        "condition": condition,
+        "specifics": specifics,
 
     response = requests.put(url, json=data, headers=headers)
 
