@@ -1,14 +1,14 @@
+import base64
+import cryptography.fernet
+import hashlib
+import json
+import logging
 import os
 import requests
-import base64
-import logging
-import json
 import time
-import hashlib
-import cryptography.fernet
 from cryptography.fernet import Fernet
-from requests_oauthlib import OAuth2Session
 from dotenv import load_dotenv
+from requests_oauthlib import OAuth2Session
 
 load_dotenv()
 
@@ -76,8 +76,7 @@ def get_auth_url():
         redirect_uri=REDIRECT_URI,
         scope=SCOPES,
         state=state,
-        code_challenge=code_challenge,
-        code_challenge_method="S256",
+    )
     )
     auth_url, _ = ebay.authorization_url(EBAY_AUTH_URL)
     return auth_url
