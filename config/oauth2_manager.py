@@ -35,14 +35,18 @@ if not ENCRYPTION_KEY:
 cipher = Fernet(ENCRYPTION_KEY.encode())
 
 
-def load_tokens():
-    try:
-        with open(TOKEN_STORAGE, "rb") as file:
-            encrypted_data = file.read()
-            decrypted_data = cipher.decrypt(encrypted_data).decode()
-            return json.loads(decrypted_data)
-    except (FileNotFoundError, cryptography.fernet.InvalidToken):
-        return {}
+def get_ebay_access_token():
+    tokens = load_tokens()
+
+    if "access_token" in tokens:
+        return tokens["access_token"]
+
+    if "refresh_token" in tokens:
+        return refresh_access_token(tokens["refresh_token"])
+
+    # Instead of raising an error, return the login URL
+    login_url = get_auth_url()
+    return {"error": "User not logged in", "login_url": login_url}
 
 
 def save_tokens(tokens):
