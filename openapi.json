@@ -1,0 +1,54 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Price-It API",
+    "description": "A FastAPI-based eBay and Mercari automation service.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/sold-items": {
+      "get": {
+        "summary": "Fetch Sold eBay Items",
+        "description": "Retrieve sold eBay listings based on search criteria.",
+        "parameters": [
+          {"name": "q", "in": "query", "required": true, "schema": {"type": "string"}},
+          {"name": "condition", "in": "query", "schema": {"type": "string"}},
+          {"name": "specifics", "in": "query", "schema": {"type": "string"}},
+          {"name": "min_price", "in": "query", "schema": {"type": "number"}},
+          {"name": "max_price", "in": "query", "schema": {"type": "number"}}
+        ],
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {}}}
+        }
+      }
+    },
+    "/mercari-sold-items": {
+      "get": {
+        "summary": "Fetch Sold Mercari Items",
+        "description": "Retrieve sold Mercari listings based on search criteria.",
+        "parameters": [
+          {"name": "q", "in": "query", "required": true, "schema": {"type": "string"}},
+          {"name": "num_pages", "in": "query", "schema": {"type": "integer", "default": 3}}
+        ],
+        "responses": {
+          "200": {"description": "Successful Response", "content": {"application/json": {}}}
+        }
+      }
+    },
+    "/sell-item": {
+      "post": {
+        "summary": "Sell an Item on eBay",
+        "description": "Post an item for sale on eBay with given details.",
+        "parameters": [
+          {"name": "title", "in": "query", "required": true, "schema": {"type": "string"}},
+          {"name": "price", "in": "query", "required": true, "schema": {"type": "number"}},
+          {"name": "condition", "in": "query", "schema": {"type": "string", "default": "New"}},
+          {"name": "specifics", "in": "query", "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {"description": "Item successfully posted", "content": {"application/json": {}}}
+        }
+      }
+    }
+  }
+}
