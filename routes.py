@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query
+from platforms.ebay.api.ebay_poster import post_ebay_inventory_item
 from platforms.ebay.automation.ebay_scraper import scraper
-from utils.log_manager import console
+
 router = APIRouter()
 
 @router.get("/sold-items")
@@ -36,4 +37,3 @@ def get_mercari_sold_items(
     console.info("/mercari-sold-items endpoint called, fetching results.")
     results = mercari_scraper.scrape_mercari_sold(q, num_pages)
     return {"search_query": q, "results": results}
-
