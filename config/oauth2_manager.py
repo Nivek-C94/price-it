@@ -67,10 +67,7 @@ def get_ebay_access_token():
 
     if "refresh_token" in tokens:
         return refresh_access_token(tokens["refresh_token"])
-
-    # Return login URL if authentication is required
-    login_url = get_auth_url()
-    return {"error": "User not logged in", "login_url": login_url}
+    return {"status": "unauthenticated", "message": "User needs to authenticate.", "oauth_url": login_url}
 
 
 
