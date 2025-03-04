@@ -15,8 +15,6 @@ load_dotenv()
 
 CLIENT_ID = os.getenv('EBAY_CLIENT_ID')
 CLIENT_SECRET = os.getenv("EBAY_CLIENT_SECRET")
-print(CLIENT_ID)
-print(CLIENT_SECRET)
 REDIRECT_URI = "https://snap-n-sell.duckdns.org/auth/accepted"
 EBAY_AUTH_URL = "https://auth.ebay.com/oauth2/authorize"
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
@@ -31,9 +29,13 @@ if not os.path.exists("resources"):
     os.makedirs("resources")
 
 if not ENCRYPTION_KEY:
-    ENCRYPTION_KEY = Fernet.generate_key().decode()
-    with open("resources/encryption_key.txt", "w") as key_file:
-        key_file.write(ENCRYPTION_KEY)
+    if os.path.exists("resources/encryption_key.txt"):
+        with open("resources/encryption_key.txt", "r") as key_file:
+            ENCRYPTION_KEY = key_file.read().strip()
+    else:
+        ENCRYPTION_KEY = Fernet.generate_key().decode()
+        with open("resources/encryption_key.txt", "w") as key_file:
+            key_file.write(ENCRYPTION_KEY)
 
 cipher = Fernet(ENCRYPTION_KEY.encode())
 
@@ -72,10 +74,6 @@ def get_ebay_access_token():
 
 
 
-def save_tokens(tokens):
-    encrypted_data = cipher.encrypt(json.dumps(tokens).encode())
-    with open(TOKEN_STORAGE, "wb") as file:
-        file.write(encrypted_data)
 
 
 # CSRF Protection: Generate and Validate State
@@ -86,12 +84,19 @@ def generate_state():
     return state
 
 
-def validate_state(received_state, expected_state):
+def validate_state(received_state):
+    try:
+        with open(STATE_STORAGE, "r") as file:
+            expected_state = file.read().strip()
+            return received_state == expected_state
+    except FileNotFoundError:
+        return False
     return received_state == expected_state
 
 
 def get_auth_url():
-    state = generate_state()
+    with open(STATE_STORAGE, "w") as file:
+        file.write(state)
     code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode().rstrip("=")
     code_challenge = (
         base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest())
@@ -170,4 +175,3 @@ def refresh_access_token(refresh_token):
     except requests.exceptions.RequestException as e:
         logging.error("🚨 Token refresh failed: %s", str(e))
         raise Exception("Failed to refresh token.")
-
