@@ -19,7 +19,7 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
     if isinstance(access_token, dict) and "error" in access_token:
         print(f"❌ Authentication required: {access_token['error']}")
         print(f"🔗 Please log in here: {access_token['login_url']}")
-        return False  # Indicate that authentication is needed
+        return {"success": False, "response": access_token} # Indicate that authentication is needed
 
     url = "https://api.ebay.com/sell/inventory/v1/inventory_item/" + sanitize_sku(sku)
 
