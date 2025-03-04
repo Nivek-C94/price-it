@@ -1,14 +1,12 @@
-from http.client import HTTPException
-
 import httpx as httpx
+from config.auth_accepted import auth_accepted
 from fastapi import APIRouter, Query,  Request  # Import Body
-from pydantic import BaseModel
-from starlette.responses import RedirectResponse
-
-from config import oauth2_manager
+from http.client import HTTPException
 from platforms.ebay.api.ebay_poster import post_ebay_inventory_item, sanitize_sku
 from platforms.ebay.automation.ebay_scraper import scraper
 from platforms.mercari.automation import mercari_scraper
+from pydantic import BaseModel
+from starlette.responses import RedirectResponse
 from utils.log_manager import console
 
 router = APIRouter()
@@ -30,7 +28,7 @@ async def capture_state_and_redirect(request: Request):
 @router.get("/")
 async def ebay_auth_accepted(request: Request):
     """Handles eBay OAuth callback and exchanges the auth code for an access token."""
-    response = await oauth2_manager.auth_accepted(request)
+    response = await auth_accepted(request)
     print(response)
     return response
 
@@ -38,7 +36,7 @@ async def ebay_auth_accepted(request: Request):
 @router.get("/auth/accepted")
 async def ebay_auth_accepted(request: Request):
     """Handles eBay OAuth callback and exchanges the auth code for an access token."""
-    access_token, refresh_token, expires_in = await oauth2_manager.auth_accepted(request)
+    return await auth_accepted(request)
     return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": expires_in}
 
 
@@ -99,4 +97,3 @@ async def sell_item(request: SellItemRequest):
         return {"status": "unauthenticated", "response": response.get("response")}
 
     return {"status": "success", "response": response}
-
