@@ -54,7 +54,6 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
     return False
 
 
-
 if __name__ == "__main__":
     try:
         post_ebay_inventory_item("Test SKU!@#123", "Sample eBay Item", "19.99")

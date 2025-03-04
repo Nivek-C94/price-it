@@ -95,8 +95,8 @@ async def sell_item(request: SellItemRequest):
         sanitized_sku, request.title, request.price, request.condition, request.specifics
     )
 
-    if not response.get("success", False):
-        return {"status": "unauthenticated", "response": response}
+    if not response:
+        return {"status": "unauthenticated", "response": response.get("response")}
 
     return {"status": "success", "response": response}
 
