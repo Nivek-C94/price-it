@@ -37,7 +37,6 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
         "price": {"value": price, "currency": "USD"}
     }
 
-    }
     for attempt in range(3):
         response = requests.put(url, json=data, headers=headers)
 

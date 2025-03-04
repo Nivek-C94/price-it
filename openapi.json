@@ -21,11 +21,7 @@
           "200": {"description": "Successful Response", "content": {"application/json": {}}}
         }
       }
-        - name: sku
-          in: query
-          required: true
-          schema:
-            type: string
+    },
     "/mercari-sold-items": {
       "get": {
         "summary": "Fetch Sold Mercari Items",
@@ -53,9 +49,6 @@
           "200": {"description": "Item successfully posted", "content": {"application/json": {}}}
         }
       }
-        - name: specifics
-          in: body
-          schema:
-            type: object
+    }
   }
 }
