@@ -67,7 +67,7 @@ def get_ebay_access_token():
 
     if "refresh_token" in tokens:
         return refresh_access_token(tokens["refresh_token"])
-    return {"status": "unauthenticated", "message": "User needs to authenticate.", "oauth_url": login_url}
+    return {"status": "unauthenticated", "message": "User needs to authenticate.", "oauth_url": get_auth_url()}
 
 
 
@@ -78,6 +78,8 @@ def get_ebay_access_token():
 
 def generate_state():
     state = base64.urlsafe_b64encode(os.urandom(32)).decode()
+    with open(STATE_STORAGE, "w") as file:
+        file.write(state)  # Save state immediately
     return state
 
 
@@ -92,6 +94,7 @@ def validate_state(received_state):
 
 
 def get_auth_url():
+    state = generate_state()  # Generate state before using it
     with open(STATE_STORAGE, "w") as file:
         file.write(state)
     code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode().rstrip("=")
