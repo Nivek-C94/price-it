@@ -94,6 +94,17 @@ async def sell_item(request: SellItemRequest):
     )
 
     if not response:
+        return {"status": "unauthenticated", "response": response.get("response")} 
+
+    offer_response = create_ebay_offer(sanitized_sku, request.price)
+    if "offerId" not in offer_response:
+        return {"status": "error", "message": "Failed to create offer", "response": offer_response}
+
+    publish_response = publish_ebay_offer(offer_response["offerId"])
+    return {"status": "success", "response": publish_response}
+    )
+
+    if not response:
         return {"status": "unauthenticated", "response": response.get("response")}
 
     return {"status": "success", "response": response}
