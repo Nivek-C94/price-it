@@ -2,8 +2,8 @@ import json
 import re
 import requests
 import time
-from config import oauth2_manager
-from config.oauth2_manager import get_ebay_access_token
+from platforms.ebay.security.oauth2_manager import get_ebay_access_token
+
 
 def sanitize_sku(sku):
     """Ensure SKU is valid by removing special characters and truncating if necessary."""
@@ -16,7 +16,11 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
     access_token = get_ebay_access_token()
 
     # Check if authentication is required
-    if isinstance(access_token, dict) and "status" in access_token and access_token["status"] == "unauthenticated":
+    if (
+        isinstance(access_token, dict)
+        and "status" in access_token
+        and access_token["status"] == "unauthenticated"
+    ):
         print(f"❌ Authentication required: {access_token['message']}")
         print(f"🔗 Please log in here: {access_token['oauth_url']}")
         return {"success": False, "response": access_token}
@@ -33,10 +37,14 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
 
     data = {
         "sku": sku,
-        "product": {"title": title, "aspects": specifics, "conditionDescriptors": [str(condition)]},
+        "product": {
+            "title": title,
+            "aspects": specifics,
+            "conditionDescriptors": [str(condition)],
+        },
         "availability": {"shipToLocationAvailability": {"quantity": 1}},
         "price": {"value": price, "currency": "USD"},
-        "marketplaceId": "EBAY_US"
+        "marketplaceId": "EBAY_US",
     }
 
     for attempt in range(3):
@@ -52,14 +60,15 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
             return {"success": True, "response": response_data}
 
         elif response.status_code in [500, 502, 503, 504]:
-            print(f"⚠️ Temporary error ({response.status_code}). Retrying in {2**attempt} seconds...")
+            print(
+                f"⚠️ Temporary error ({response.status_code}). Retrying in {2**attempt} seconds..."
+            )
             time.sleep(2**attempt)
         else:
             break  # Other errors should not be retried
 
     print("🚨 Error posting item:", response_data)
     return {"success": False, "response": response_data}
-
 
 
 if __name__ == "__main__":

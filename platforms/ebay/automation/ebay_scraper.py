@@ -1,6 +1,5 @@
 import threading
 import urllib.parse
-import logging
 import re
 import os
 import queue
@@ -10,7 +9,7 @@ from botasaurus_driver.core import config
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
-from config import settings
+from utils import settings
 from utils.log_manager import console
 from utils.utils import detect_price_outliers
 

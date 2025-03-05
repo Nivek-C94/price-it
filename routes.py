@@ -1,7 +1,7 @@
-import httpx as httpx
-from config.auth_accepted import auth_accepted
-from fastapi import APIRouter, Query,  Request  # Import Body
+from fastapi import APIRouter, Query, Request  # Import Body
 from http.client import HTTPException
+
+from platforms.ebay.security.oauth2_manager import auth_accepted
 from platforms.ebay.api.ebay_poster import post_ebay_inventory_item, sanitize_sku
 from platforms.ebay.automation.ebay_scraper import scraper
 from platforms.mercari.automation import mercari_scraper
@@ -33,14 +33,6 @@ async def ebay_auth_accepted(request: Request):
     return response
 
 
-@router.get("/auth/accepted")
-async def ebay_auth_accepted(request: Request):
-    """Handles eBay OAuth callback and exchanges the auth code for an access token."""
-    return await auth_accepted(request)
-    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": expires_in}
-
-
-
 @router.get("/sold-items")
 def get_sold_items(
     q: str = Query(..., title="Search Query", description="Enter eBay search query"),
@@ -65,15 +57,19 @@ def get_sold_items(
     console.info("/Sold-items endpoint called, fetching results.")
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
 
+
 @router.get("/mercari-sold-items")
 def get_mercari_sold_items(
     q: str = Query(..., title="Search Query", description="Enter Mercari search query"),
-    num_pages: int = Query(3, title="Number of Pages", description="Number of pages to scrape"),
+    num_pages: int = Query(
+        3, title="Number of Pages", description="Number of pages to scrape"
+    ),
 ):
     """API endpoint to fetch sold Mercari items."""
     console.info("/mercari-sold-items endpoint called, fetching results.")
     results = mercari_scraper.scrape_mercari_sold(q, num_pages)
     return {"search_query": q, "results": results}
+
 
 # Define the request model properly
 class SellItemRequest(BaseModel):
@@ -83,6 +79,7 @@ class SellItemRequest(BaseModel):
     condition: str = "New"
     specifics: dict = {}
 
+
 @router.post("/sell-item")
 async def sell_item(request: SellItemRequest):
     """API endpoint to post an item for sale on eBay."""
@@ -90,7 +87,11 @@ async def sell_item(request: SellItemRequest):
 
     sanitized_sku = sanitize_sku(request.sku)
     response = post_ebay_inventory_item(
-        sanitized_sku, request.title, request.price, request.condition, request.specifics
+        sanitized_sku,
+        request.title,
+        request.price,
+        request.condition,
+        request.specifics,
     )
 
     if not response:
@@ -106,5 +107,7 @@ async def sell_item(request: SellItemRequest):
 
     if not response:
         return {"status": "unauthenticated", "response": response.get("response")}
+
+    print(f"🔍 DEBUG: eBay API Response: {response}")
 
     return {"status": "success", "response": response}

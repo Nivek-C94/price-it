@@ -1,7 +1,4 @@
-import json
-import requests
 from fastapi import Request
-from config.oauth2_manager import validate_state, fetch_tokens
 
 import base64
 import cryptography.fernet
