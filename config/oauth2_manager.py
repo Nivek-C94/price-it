@@ -59,14 +59,19 @@ def save_tokens(tokens):
 
 
 def get_ebay_access_token():
-    """Retrieve a valid access token or prompt for login if unavailable."""
+    """Retrieve a valid access token or force a refresh if invalid."""
     tokens = load_tokens()
+    print(f"🔍 DEBUG: Loaded Tokens: {tokens}")
 
     if "access_token" in tokens:
-        return tokens["access_token"]
+        print("✅ Using stored access token")
+        return refresh_access_token(tokens["refresh_token"])  # Always refresh the token
 
     if "refresh_token" in tokens:
+        print("♻️ Refreshing access token")
         return refresh_access_token(tokens["refresh_token"])
+
+    print("🚨 No valid token found. Authentication required.")
     return {"status": "unauthenticated", "message": "User needs to authenticate.", "oauth_url": get_auth_url()}
 
 
