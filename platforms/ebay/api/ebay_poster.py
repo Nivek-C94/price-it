@@ -32,8 +32,7 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
 
     data = {
         "sku": sku,
-        "product": {"title": title, "aspects": specifics},
-        "condition": condition,
+        "product": {"title": title, "aspects": specifics, "conditionDescriptors": [str(condition)]},
         "availability": {"shipToLocationAvailability": {"quantity": 1}},
         "price": {"value": price, "currency": "USD"},
         "marketplaceId": "EBAY_US"
