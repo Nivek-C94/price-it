@@ -28,6 +28,7 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "Content-Language": "en-US"  # Ensure a valid language header
     }
 
     data = {
