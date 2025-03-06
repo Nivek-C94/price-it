@@ -13,6 +13,14 @@ def sanitize_sku(sku):
 def post_ebay_inventory_item(sku, title, price, condition, specifics):
     """Post an item to eBay using a valid OAuth2 token."""
     access_token = get_ebay_access_token()
+    if not access_token or isinstance(access_token, dict) and 'status' in access_token and access_token['status'] == 'unauthenticated':
+        print("🔴 Token expired. Attempting to refresh...")
+        time.sleep(2)  # Small delay before retry
+        access_token = get_ebay_access_token()  # Retry fetching the token
+        if not access_token or (isinstance(access_token, dict) and 'status' in access_token and access_token['status'] == 'unauthenticated'):
+            print(f"❌ Authentication required: {access_token.get('message', 'Unknown error')}")
+            print(f"🔗 Please log in here: {access_token.get('oauth_url', 'No URL')}")
+            return {"success": False, "response": access_token}
 
     # Check if authentication is required
     if (
@@ -27,7 +35,12 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
     sku = sanitize_sku(sku)  # Sanitize SKU once
 
     url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{sku}"
-        "Content-Language": "en-US"  # Ensure a valid language header for eBay
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Content-Language": "en-US"
+    }
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Accept": "application/json",
