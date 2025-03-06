@@ -88,9 +88,18 @@ class EbayScraper:
             return
 
         try:
-            bot.get(url)
-            bot.wait_for_element(".s-item")
-            html_source = bot.page_html
+            for attempt in range(3):  # Retry mechanism with exponential backoff
+                try:
+                    bot.get(url)
+                    bot.wait_for_element(".s-item")
+                    html_source = bot.page_html
+                    break  # Exit loop if successful
+                except Exception as e:
+                    console.error(f"Error fetching page {page} (Attempt {attempt + 1}): {e}")
+                    time.sleep(2 ** attempt)  # Exponential backoff
+            else:
+                console.error(f"❌ Failed to fetch page {page} after multiple attempts.")
+                return
             for attempt in range(3):  # Retry mechanism with exponential backoff
                 try:
                     bot.get(url)
