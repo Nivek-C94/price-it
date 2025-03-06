@@ -4,7 +4,6 @@ import requests
 import time
 from platforms.ebay.security.oauth2_manager import get_ebay_access_token
 
-
 def sanitize_sku(sku):
     """Ensure SKU is valid by removing special characters and truncating if necessary."""
     sku = re.sub(r"[^a-zA-Z0-9]", "", sku)  # Remove non-alphanumeric characters
@@ -28,7 +27,7 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
     sku = sanitize_sku(sku)  # Sanitize SKU once
 
     url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{sku}"
-    headers = {
+        "Content-Language": "en-US"  # Ensure a valid language header for eBay
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
         "Accept": "application/json",
