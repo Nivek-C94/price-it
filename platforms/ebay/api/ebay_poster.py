@@ -90,6 +90,45 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
 
     return {"success": True, "response": publish_response}
 
+def create_ebay_offer(sku, price):
+    """Create an eBay offer for the given SKU and price."""
+    access_token = get_ebay_access_token()
+    if not access_token:
+        return {"success": False, "error": "Authentication failed"}
+
+    url = "https://api.ebay.com/sell/offers/v1/offer"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    data = {
+        "sku": sku,
+        "marketplaceId": "EBAY_US",
+        "format": "FIXED_PRICE",
+        "listingDuration": "GTC",
+        "pricingSummary": {"price": {"value": price, "currency": "USD"}}
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+    return response.json()
+
+def publish_ebay_offer(offer_id):
+    """Publish an eBay offer to make the listing live."""
+    access_token = get_ebay_access_token()
+    if not access_token:
+        return {"success": False, "error": "Authentication failed"}
+
+    url = f"https://api.ebay.com/sell/inventory/v1/offer/{offer_id}/publish"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    response = requests.post(url, headers=headers)
+    return response.json()
 
 if __name__ == "__main__":
     try:
