@@ -1,18 +1,15 @@
-import threading
-import urllib.parse
-import re
 import os
 import queue
-
+import re
+import threading
+import urllib.parse
 from botasaurus_driver import driver
 from botasaurus_driver.core import config
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-
 from utils import settings
 from utils.log_manager import console
 from utils.utils import detect_price_outliers
-
 
 def get_fixed_linux_executable_path():
     """
@@ -94,8 +91,18 @@ class EbayScraper:
             bot.get(url)
             bot.wait_for_element(".s-item")
             html_source = bot.page_html
-        except Exception as e:
-            console.error(f"Error fetching page {page}: {e}")
+            for attempt in range(3):  # Retry mechanism with exponential backoff
+                try:
+                    bot.get(url)
+                    bot.wait_for_element(".s-item")
+                    html_source = bot.page_html
+                    break  # Exit loop if successful
+                except Exception as e:
+                    console.error(f"Error fetching page {page} (Attempt {attempt + 1}): {e}")
+                    time.sleep(2 ** attempt)  # Exponential backoff
+            else:
+                console.error(f"❌ Failed to fetch page {page} after multiple attempts.")
+                return
             try:
                 bot.close()
             except Exception:
@@ -122,7 +129,10 @@ class EbayScraper:
                     self.driver_pool.put(new_bot)
                 except Exception as e:
                     console.error(f"Error reinitializing driver: {e}")
-
+        # CAPTCHA Handling
+        if "Please verify you're a human" in html_source:
+            console.warning("🚨 CAPTCHA detected! Manual intervention needed.")
+            return
         soup = BeautifulSoup(html_source, "html.parser")
         local_results = []
         local_prices = []
