@@ -100,24 +100,8 @@ class EbayScraper:
             else:
                 console.error(f"❌ Failed to fetch page {page} after multiple attempts.")
                 return
-            for attempt in range(3):  # Retry mechanism with exponential backoff
-                try:
-                    bot.get(url)
-                    bot.wait_for_element(".s-item")
-                    html_source = bot.page_html
-                    break  # Exit loop if successful
-                except Exception as e:
-                    console.error(f"Error fetching page {page} (Attempt {attempt + 1}): {e}")
-                    time.sleep(2 ** attempt)  # Exponential backoff
-            else:
-                console.error(f"❌ Failed to fetch page {page} after multiple attempts.")
-                return
             try:
-                bot.close()
-            except Exception:
-                pass
-            try:
-                new_bot = driver.Driver(user_agent=UserAgent().random, headless=True)
+                bot = driver.Driver(user_agent=user_agent, headless=True)
                 self.driver_pool.put(new_bot)
             except Exception as e:
                 console.error(f"Error reinitializing driver: {e}")
@@ -139,9 +123,9 @@ class EbayScraper:
                 except Exception as e:
                     console.error(f"Error reinitializing driver: {e}")
         # CAPTCHA Handling
-        if "Please verify you're a human" in html_source:
-            console.warning("🚨 CAPTCHA detected! Manual intervention needed.")
-            return
+            console.warning("🚨 CAPTCHA detected! Retrying after 10 seconds...")
+            time.sleep(10)
+            return self.scrape_page(query, condition, specifics, page, exclude_parts)
         soup = BeautifulSoup(html_source, "html.parser")
         local_results = []
         local_prices = []
