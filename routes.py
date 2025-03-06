@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Query, Request  # Import Body
+import requests
+
+from fastapi import APIRouter, Query, Request
 from http.client import HTTPException
 
-from platforms.ebay.security.oauth2_manager import auth_accepted
-from platforms.ebay.api.ebay_poster import post_ebay_inventory_item, sanitize_sku
+from platforms.ebay.security.oauth2_manager import auth_accepted, get_ebay_access_token
+from platforms.ebay.api.ebay_poster import post_ebay_inventory_item, sanitize_sku, create_ebay_offer, publish_ebay_offer
 from platforms.ebay.automation.ebay_scraper import scraper
 from platforms.mercari.automation import mercari_scraper
 from pydantic import BaseModel
@@ -29,7 +31,6 @@ async def capture_state_and_redirect(request: Request):
 async def ebay_auth_accepted(request: Request):
     """Handles eBay OAuth callback and exchanges the auth code for an access token."""
     response = await auth_accepted(request)
-    print(response)
     return response
 
 
@@ -95,7 +96,7 @@ async def sell_item(request: SellItemRequest):
     )
 
     if not response:
-        return {"status": "unauthenticated", "response": response.get("response")} 
+        return {"status": "unauthenticated", "response": response.get("response")}
 
     offer_response = create_ebay_offer(sanitized_sku, request.price)
     if "offerId" not in offer_response:
@@ -103,11 +104,52 @@ async def sell_item(request: SellItemRequest):
 
     publish_response = publish_ebay_offer(offer_response["offerId"])
     return {"status": "success", "response": publish_response}
-    )
 
-    if not response:
-        return {"status": "unauthenticated", "response": response.get("response")}
+@router.get("/listings")
+async def get_active_listings():
+    """Fetch all active eBay listings (not just inventory)."""
+    access_token = get_ebay_access_token()
+    url = "https://api.ebay.com/sell/inventory/v1/offer?format=FIXED_PRICE"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/json"
+    }
 
-    print(f"🔍 DEBUG: eBay API Response: {response}")
+    response = requests.get(url, headers=headers)
+    return response.json()
 
-    return {"status": "success", "response": response}
+
+@router.get("/drafts")
+async def get_draft_listings():
+    """Fetch all eBay draft listings."""
+    access_token = get_ebay_access_token()
+    url = "https://api.ebay.com/sell/inventory/v1/inventory_item?listingStatus=DRAFT"
+    headers = {"Authorization": f"Bearer {access_token}", "Accept": "application/json"}
+
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+@router.put("/modify-listing/{listing_id}")
+async def modify_ebay_listing(listing_id: str, updated_data: dict):
+    """Modify an active eBay listing."""
+    access_token = get_ebay_access_token()
+    url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{listing_id}"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    response = requests.put(url, json=updated_data, headers=headers)
+    return response.json()
+
+@router.get("/listing/{listing_id}")
+async def get_ebay_listing(listing_id: str):
+    """Fetch details of a specific eBay listing."""
+    access_token = get_ebay_access_token()
+    url = f"https://api.ebay.com/sell/inventory/v1/inventory_item/{listing_id}"
+    headers = {"Authorization": f"Bearer {access_token}", "Accept": "application/json"}
+
+    response = requests.get(url, headers=headers)
+    return response.json()
