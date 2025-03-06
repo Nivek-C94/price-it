@@ -41,11 +41,6 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
         "Accept": "application/json",
         "Content-Language": "en-US"
     }
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Content-Language": "en-US"  # Ensure a valid language header
-    }
 
     data = {
         "sku": sku,
@@ -53,10 +48,12 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
             "title": title,
             "aspects": specifics,
             "conditionDescriptors": [str(condition)],
+            "brand": specifics.get("Brand", "Unbranded"),
+            "categoryId": "9355"  # Example: Category ID for Cell Phones
         },
         "availability": {"shipToLocationAvailability": {"quantity": 1}},
         "price": {"value": price, "currency": "USD"},
-        "marketplaceId": "EBAY_US",
+        "marketplaceId": "EBAY_US"
     }
     for attempt in range(3):
         response = requests.put(url, json=data, headers=headers)
@@ -75,8 +72,9 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
                 f"⚠️ Temporary error ({response.status_code}). Retrying in {2**attempt} seconds..."
             )
             time.sleep(2**attempt)
-        else:
-            break  # Other errors should not be retried
+        elif response.status_code in [400, 403]:
+            print(f"❌ Client error ({response.status_code}):", response_data)
+            return {"success": False, "response": response_data}
 
     print("🚨 Error posting item:", response_data)
     return {"success": False, "response": response_data}
