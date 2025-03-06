@@ -79,13 +79,12 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
     print("🚨 Error posting item:", response_data)
     # If posting succeeds, create an offer
     offer_response = create_ebay_offer(sku, price)
-    if "offerId" not in offer_response:
+    if not offer_response or "offerId" not in offer_response:
         print("❌ Failed to create offer:", offer_response)
         return {"success": False, "response": offer_response}
 
-    # Publish the offer
     publish_response = publish_ebay_offer(offer_response["offerId"])
-    if "listingId" not in publish_response:
+    if not publish_response or "listingId" not in publish_response:
         print("❌ Failed to publish offer:", publish_response)
         return {"success": False, "response": publish_response}
 
