@@ -93,6 +93,7 @@ def post_ebay_inventory_item(sku, title, price, condition, specifics):
 
 if __name__ == "__main__":
     try:
-        post_ebay_inventory_item("Test SKU!@#123", "Sample eBay Item", "19.99")
+        test_specifics = {"Brand": "ExampleBrand", "Color": "Black"}
+        post_ebay_inventory_item("TestSKU123", "Sample eBay Item", "19.99", "New", test_specifics)
     except Exception as e:
         print("Error:", e)
