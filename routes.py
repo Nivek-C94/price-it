@@ -1,11 +1,9 @@
 import requests
-
 from fastapi import APIRouter, Query, Request
 from http.client import HTTPException
-
-from platforms.ebay.security.oauth2_manager import auth_accepted, get_ebay_access_token
 from platforms.ebay.api.ebay_poster import post_ebay_inventory_item, sanitize_sku, create_ebay_offer, publish_ebay_offer
 from platforms.ebay.automation.ebay_scraper import scraper
+from platforms.ebay.security.oauth2_manager import auth_accepted, get_ebay_access_token
 from platforms.mercari.automation import mercari_scraper
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
@@ -17,7 +15,7 @@ router = APIRouter()
 async def capture_state_and_redirect(request: Request):
     """Handles initial state validation and redirects to /auth/accepted."""
     state = request.query_params.get("state")
-    auth_code = request.query_params.get("code")
+from platforms.ebay.automation.ebay_web_poster import post_item_stealth
 
     if not state or not auth_code:
         raise HTTPException()
@@ -102,9 +100,29 @@ async def sell_item(request: SellItemRequest):
     if "offerId" not in offer_response:
         return {"status": "error", "message": "Failed to create offer", "response": offer_response}
 
-    publish_response = publish_ebay_offer(offer_response["offerId"])
+class StealthSellRequest(BaseModel):
+    sku: str
+    title: str
+    price: float
+    condition: str = "New"
+    specifics: dict = {}  # Can support any nested item specifics dynamically
     return {"status": "success", "response": publish_response}
-
+@router.post("/sell-item-stealth")
+async def sell_item_stealth(request: StealthSellRequest):
+    """Post eBay item using full stealth Botasaurus browser automation."""
+    console.info("/sell-item-stealth endpoint called")
+    try:
+        result = post_item_stealth(
+            sku=request.sku,
+            title=request.title,
+            price=request.price,
+            condition=request.condition,
+            specifics=request.specifics,
+        )
+        return {"status": "success", "result": result}
+    except Exception as e:
+        console.error(f"Botasaurus stealth post failed: {str(e)}")
+        return {"status": "error", "message": str(e)}
 @router.get("/listings")
 async def get_active_listings():
     """Fetch all active eBay listings (not just inventory)."""
