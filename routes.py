@@ -15,8 +15,7 @@ router = APIRouter()
 async def capture_state_and_redirect(request: Request):
     """Handles initial state validation and redirects to /auth/accepted."""
     state = request.query_params.get("state")
-from platforms.ebay.automation.ebay_web_poster import post_item_stealth
-
+    auth_code = request.query_params.get("auth_code")
     if not state or not auth_code:
         raise HTTPException()
 
@@ -106,7 +105,7 @@ class StealthSellRequest(BaseModel):
     price: float
     condition: str = "New"
     specifics: dict = {}  # Can support any nested item specifics dynamically
-    return {"status": "success", "response": publish_response}
+
 @router.post("/sell-item-stealth")
 async def sell_item_stealth(request: StealthSellRequest):
     """Post eBay item using full stealth Botasaurus browser automation."""
@@ -123,6 +122,7 @@ async def sell_item_stealth(request: StealthSellRequest):
     except Exception as e:
         console.error(f"Botasaurus stealth post failed: {str(e)}")
         return {"status": "error", "message": str(e)}
+
 @router.get("/listings")
 async def get_active_listings():
     """Fetch all active eBay listings (not just inventory)."""

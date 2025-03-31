@@ -9,3 +9,5 @@ SCRAPER_NUM_PAGES = 1
 SCRAPER_NUM_DRIVERS = 1
 # Outlier detection multiplier for the IQR method (default 1.5)
 OUTLIER_IQR_MULTIPLIER = 1.5
+# eBay maketplace ID
+EBAY_MARKETPLACE_ID = "EBAY_US"

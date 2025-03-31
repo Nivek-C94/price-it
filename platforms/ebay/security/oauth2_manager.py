@@ -20,7 +20,18 @@ CLIENT_SECRET = os.getenv("EBAY_CLIENT_SECRET")
 REDIRECT_URI = "https://snap-n-sell.duckdns.org/auth/accepted"
 EBAY_AUTH_URL = "https://auth.ebay.com/oauth2/authorize"
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
-SCOPES = "https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.inventory"
+SCOPES = " ".join([
+    "https://api.ebay.com/oauth/api_scope",
+    "https://api.ebay.com/oauth/api_scope/sell.inventory",
+    "https://api.ebay.com/oauth/api_scope/sell.account",
+    "https://api.ebay.com/oauth/api_scope/sell.fulfillment",
+    "https://api.ebay.com/oauth/api_scope/sell.marketing",
+    "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
+    "https://api.ebay.com/oauth/api_scope/sell.reputation",
+    "https://api.ebay.com/oauth/api_scope/sell.stores"
+])
+
+
 
 TOKEN_STORAGE = os.getenv("TOKEN_STORAGE_PATH", "resources/ebay_tokens.json")
 STATE_STORAGE = os.getenv("STATE_STORAGE_PATH", "resources/oauth_state.json")
@@ -196,3 +207,6 @@ def refresh_access_token(refresh_token):
     except requests.exceptions.RequestException as e:
         logging.error("🚨 Token refresh failed: %s", str(e))
         raise Exception("Failed to refresh token.")
+
+
+print(get_auth_url())
