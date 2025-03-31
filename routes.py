@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query, Request
 from http.client import HTTPException
 from platforms.ebay.api.ebay_poster import post_ebay_inventory_item, sanitize_sku, create_ebay_offer, publish_ebay_offer
 from platforms.ebay.automation.ebay_scraper import scraper
+from platforms.ebay.automation.ebay_web_poster import post_item_stealth
 from platforms.ebay.security.oauth2_manager import auth_accepted, get_ebay_access_token
 from platforms.mercari.automation import mercari_scraper
 from pydantic import BaseModel
@@ -14,7 +15,7 @@ router = APIRouter()
 
 async def capture_state_and_redirect(request: Request):
     """Handles initial state validation and redirects to /auth/accepted."""
-    state = request.query_params.get("state")
+    auth_code = request.query_params.get("code")
     auth_code = request.query_params.get("auth_code")
     if not state or not auth_code:
         raise HTTPException()
@@ -99,7 +100,8 @@ async def sell_item(request: SellItemRequest):
     if "offerId" not in offer_response:
         return {"status": "error", "message": "Failed to create offer", "response": offer_response}
 
-class StealthSellRequest(BaseModel):
+    publish_response = publish_ebay_offer(offer_response["offerId"])
+    return {"status": "success", "response": publish_response}
     sku: str
     title: str
     price: float
