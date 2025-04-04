@@ -16,7 +16,7 @@ router = APIRouter()
 async def capture_state_and_redirect(request: Request):
     """Handles initial state validation and redirects to /auth/accepted."""
     auth_code = request.query_params.get("code")
-    auth_code = request.query_params.get("auth_code")
+    state = request.query_params.get("state")
     if not state or not auth_code:
         raise HTTPException()
 

@@ -1,4 +1,6 @@
-from botasaurus import with_page
+from botasaurus_driver import Driver
+
+from driver import driver_pool
 
 
 def sanitize_sku(sku):
@@ -10,28 +12,25 @@ def sanitize_sku(sku):
 
 def post_item_stealth(sku, title, price, condition, specifics):
     """Posts an item to eBay via web automation (no API)."""
-    
-    @with_page
-    def automate_listing(page):
-        page.goto("https://www.ebay.com/sl/sell")
-        page.wait_for("input#title")
+    bot: Driver = driver_pool.get(timeout=10)
+    bot.google_get("https://www.ebay.com/sl/sell")
+    bot.wait_for_element("input#title")
 
-        page.fill("input#title", title)
-        page.fill("input#price", str(price))
-        page.fill("input#sku", sanitize_sku(sku))
+    bot.type("input#title", title)
+    bot.type("input#price", str(price))
+    bot.type("input#sku", sanitize_sku(sku))
 
-        if condition.lower() == "new":
-            page.click("input#condition-new")
-        else:
-            page.click("input#condition-used")
+    if condition.lower() == "new":
+        bot.click("input#condition-new")
+    else:
+        bot.click("input#condition-used")
 
-        for key, value in specifics.items():
-            selector = f"input[name='{key}']"
-            page.fill(selector, value)
+    for key, value in specifics.items():
+        selector = f"input[name='{key}']"
+        bot.type(selector, value)
 
-        page.click("button#submit-listing")
-        page.wait_for("div.success-message")
+    bot.click("button#submit-listing")
+    bot.wait_for_element("div.success-message")
 
-        return {"success": True, "message": "Item posted successfully via web automation."}
+    return {"success": True, "message": "Item posted successfully via web automation."}
 
-    return automate_listing()
