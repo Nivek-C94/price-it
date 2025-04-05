@@ -107,7 +107,13 @@ async def sell_item(request: SellItemRequest):
     price: float
     condition: str = "New"
     specifics: dict = {}  # Can support any nested item specifics dynamically
-
+# Clone of SellItemRequest for the stealth route
+class StealthSellRequest(BaseModel):
+    sku: str
+    title: str
+    price: float
+    condition: str = "New"
+    specifics: dict = {}
 @router.post("/sell-item-stealth")
 async def sell_item_stealth(request: StealthSellRequest):
     """Post eBay item using full stealth Botasaurus browser automation."""
