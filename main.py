@@ -1,9 +1,8 @@
 import os
-
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from platforms.ebay.automation.ebay_scraper import scraper
 from routes import router
 
 app = FastAPI()
@@ -18,6 +17,11 @@ app.add_middleware(
 
 # Include routes
 app.include_router(router)
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    print("🔻 Shutting down gracefully...")
+    await scraper.shutdown_all()
 
 """
 
