@@ -54,7 +54,12 @@ def get_sold_items(
 ):
     """API endpoint to fetch sold eBay items."""
     console.info("/Sold-items endpoint called, fetching results.")
-    results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
+    try:
+        results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
+        return results
+    except Exception as e:
+        console.error(f"Driver error: {str(e)}")
+        return {"status": "error", "message": "Driver pool exhausted or crashed. Please try again shortly."}
     return results
 
 
