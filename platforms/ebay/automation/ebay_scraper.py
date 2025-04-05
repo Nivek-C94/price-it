@@ -127,4 +127,13 @@ class EbayScraper:
         self.results = detect_price_outliers(self.results)
         return self.results
 
+    async def shutdown_all(self):
+        with self.lock:
+            while not self.driver_pool.empty():
+                try:
+                    bot = self.driver_pool.get()
+                    bot.quit()
+                except Exception as e:
+                    console.error(f"Failed to shutdown driver: {e}")
+
 scraper = EbayScraper()
