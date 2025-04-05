@@ -55,6 +55,7 @@ def get_sold_items(
     """API endpoint to fetch sold eBay items."""
     console.info("/Sold-items endpoint called, fetching results.")
     results = scraper.scrape_ebay_sold(q, condition, specifics, min_price, max_price)
+    return results
 
 
 @router.get("/mercari-sold-items")
@@ -108,14 +109,9 @@ async def sell_item(request: SellItemRequest):
     condition: str = "New"
     specifics: dict = {}  # Can support any nested item specifics dynamically
 # Clone of SellItemRequest for the stealth route
-class StealthSellRequest(BaseModel):
-    sku: str
-    title: str
-    price: float
-    condition: str = "New"
-    specifics: dict = {}
+
 @router.post("/sell-item-stealth")
-async def sell_item_stealth(request: StealthSellRequest):
+async def sell_item_stealth(request: SellItemRequest):
     """Post eBay item using full stealth Botasaurus browser automation."""
     console.info("/sell-item-stealth endpoint called")
     try:
