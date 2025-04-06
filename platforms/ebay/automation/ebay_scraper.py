@@ -40,8 +40,6 @@ class EbayScraper:
         self.prices = []
         self._initialize_drivers()
 
-    def _initialize_drivers(self):
-        num_drivers = getattr(settings, "SCRAPER_NUM_DRIVERS", 3)
     def _initialize_drivers(self, count=None):
         num_drivers = count or getattr(settings, "SCRAPER_NUM_DRIVERS", 3)
         console.info(f"Spawning {num_drivers} persistent drivers...")
