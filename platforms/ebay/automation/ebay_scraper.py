@@ -42,14 +42,28 @@ class EbayScraper:
 
     def _initialize_drivers(self):
         num_drivers = getattr(settings, "SCRAPER_NUM_DRIVERS", 3)
+    def _initialize_drivers(self, count=None):
+        num_drivers = count or getattr(settings, "SCRAPER_NUM_DRIVERS", 3)
         console.info(f"Spawning {num_drivers} persistent drivers...")
         for _ in range(num_drivers):
             try:
                 user_agent = UserAgent().random if hasattr(UserAgent(), 'random') else 'Mozilla/5.0'
                 bot = driver.Driver(user_agent=user_agent, headless=True)
+                self.driver_pool.put(bot)
+            except Exception as e:
+                console.error(f"❌ Failed to initialize driver: {e}")
+
+    def get_driver(self):
         with self.lock:
             if self.driver_pool.empty():
-                console.error("⚠️ Driver pool empty. Attempting to re-initialize drivers...")
+                console.error("⚠️ Driver pool empty. Attempting to re-initialize...")
+                self._initialize_drivers(count=3)
+
+            try:
+                return self.driver_pool.get_nowait()
+            except Exception as e:
+                console.error(f"🚨 Failed to acquire driver: {e}")
+                return None
                 self.initialize_drivers(count=3)
 
             try:
