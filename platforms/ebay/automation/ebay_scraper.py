@@ -47,9 +47,17 @@ class EbayScraper:
             try:
                 user_agent = UserAgent().random if hasattr(UserAgent(), 'random') else 'Mozilla/5.0'
                 bot = driver.Driver(user_agent=user_agent, headless=True)
-                self.driver_pool.put(bot)
+        with self.lock:
+            if self.driver_pool.empty():
+                console.error("⚠️ Driver pool empty. Attempting to re-initialize drivers...")
+                self.initialize_drivers(count=3)
+
+            try:
+                driver = self.driver_pool.get_nowait()
+                return driver
             except Exception as e:
-                console.error(f"Error initializing driver: {e}")
+                console.error(f"🚨 Failed to acquire driver: {e}")
+                return None
 
     def scrape_page(self, query, condition="", specifics="", page=1, exclude_parts=True):
         condition_filter = f"&LH_ItemCondition={condition}" if condition else ""
